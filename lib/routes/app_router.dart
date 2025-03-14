@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dating_app/features/auth/screens/forgot_password_screen.dart';
 import 'package:flutter_dating_app/features/auth/screens/login_screen.dart';
+import 'package:flutter_dating_app/features/auth/screens/registeration_screen.dart';
+import 'package:flutter_dating_app/features/auth/screens/verification_screen.dart';
 import 'package:flutter_dating_app/features/splash/screens/splash_screen.dart';
 import 'route_names.dart';
 import '../features/onboarding/screens/welcome_screen.dart';
@@ -21,6 +24,15 @@ class AppRouter {
 
       case RouteNames.login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
+
+            case RouteNames.signup:
+        return MaterialPageRoute(builder: (_) => const RegisterScreen());
+        
+      case RouteNames.forgotPassword:
+        return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
+        
+      case RouteNames.verification:
+        return MaterialPageRoute(builder: (_) => const VerificationScreen());
       
       case RouteNames.onboarding:
         return MaterialPageRoute(builder: (_) => const ProfileSetupScreen());
