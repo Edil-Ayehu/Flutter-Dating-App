@@ -8,6 +8,7 @@ class OnboardingProvider extends ChangeNotifier {
     required OnboardingRepository repository,
   }) : _repository = repository;
 
+
   // User data
   String _name = '';
   String _bio = '';
@@ -68,6 +69,11 @@ class OnboardingProvider extends ChangeNotifier {
 
   void setLocationPermission(bool granted) {
     _locationPermissionGranted = granted;
+    notifyListeners();
+  }
+
+  void addPhotos(List<String> photoUrls) {
+    _photos.addAll(photoUrls);
     notifyListeners();
   }
 

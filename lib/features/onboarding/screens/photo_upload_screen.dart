@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../../../core/constants/string_constants.dart';
 import '../../../core/constants/text_styles.dart';
 import '../../../core/constants/color_constants.dart';
@@ -8,6 +10,50 @@ import '../providers/onboarding_provider.dart';
 
 class PhotoUploadScreen extends StatelessWidget {
   const PhotoUploadScreen({Key? key}) : super(key: key);
+
+  Future<void> _pickImage(BuildContext context, OnboardingProvider provider) async {
+    final ImagePicker picker = ImagePicker();
+    
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Photo Library'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final XFile? image = await picker.pickImage(
+                    source: ImageSource.gallery,
+                    imageQuality: 80,
+                  );
+                  if (image != null) {
+                    provider.addPhoto(image.path);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Camera'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final XFile? photo = await picker.pickImage(
+                    source: ImageSource.camera,
+                    imageQuality: 80,
+                  );
+                  if (photo != null) {
+                    provider.addPhoto(photo.path);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +94,38 @@ class PhotoUploadScreen extends StatelessWidget {
                         
                         return GestureDetector(
                           onTap: () {
-                            // TODO: Implement photo picker
+                            if (hasPhoto) {
+                              // Show options to view or delete
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return SafeArea(
+                                    child: Wrap(
+                                      children: <Widget>[
+                                        ListTile(
+                                          leading: const Icon(Icons.fullscreen),
+                                          title: const Text('View Photo'),
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            _showFullScreenImage(context, provider.photos[index]);
+                                          },
+                                        ),
+                                        ListTile(
+                                          leading: const Icon(Icons.delete, color: Colors.red),
+                                          title: const Text('Remove Photo', style: TextStyle(color: Colors.red)),
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            provider.removePhoto(provider.photos[index]);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            } else {
+                              _pickImage(context, provider);
+                            }
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -61,8 +138,8 @@ class PhotoUploadScreen extends StatelessWidget {
                             child: hasPhoto
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
-                                    child: Image.network(
-                                      provider.photos[index],
+                                    child: Image.file(
+                                      File(provider.photos[index]),
                                       fit: BoxFit.cover,
                                     ),
                                   )
@@ -90,6 +167,34 @@ class PhotoUploadScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showFullScreenImage(BuildContext context, String imagePath) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          body: Container(
+            color: Colors.black,
+            child: Center(
+              child: InteractiveViewer(
+                panEnabled: true,
+                boundaryMargin: const EdgeInsets.all(20),
+                minScale: 0.5,
+                maxScale: 4,
+                child: Image.file(
+                  File(imagePath),
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
