@@ -1,6 +1,11 @@
 class AppStrings {
   // App Name
   static const String appName = "Heartlink";
+
+    // Navigation
+  static const String next = "Next";
+  static const String back = "Back";
+  static const String skip = "Skip";
   
   // Onboarding
   static const String welcome = "Welcome to Heartlink";
