@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dating_app/core/widgets/custom_button.dart';
+import 'package:flutter_dating_app/core/widgets/custom_text_field.dart';
 import '../../../core/constants/text_styles.dart';
 import '../../../core/constants/color_constants.dart';
 import '../../../routes/route_names.dart';
@@ -34,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: isDarkMode 
+            colors: isDarkMode
                 ? [AppColors.cardDark, AppColors.backgroundDark]
                 : [Colors.white, Colors.grey.shade50],
             stops: const [0.0, 0.3],
@@ -47,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 40),
-                
+
                 // App logo or icon
                 Center(
                   child: Container(
@@ -64,9 +66,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Welcome text
                 Text(
                   'Welcome Back',
@@ -76,75 +78,56 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 Text(
                   'Sign in to continue your journey',
                   style: AppTextStyles.bodyMediumLight.copyWith(
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+                    color: isDarkMode
+                        ? Colors.grey.shade400
+                        : Colors.grey.shade700,
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Email field
-                TextField(
+                CustomTextField(
                   controller: _emailController,
+                  labelText: 'Email',
+                  hintText: 'Enter your email',
+                  prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
-                  style: TextStyle(color: textColor),
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'Enter your email',
-                    prefixIcon: Icon(
-                      Icons.email_outlined,
-                      color: isDarkMode ? AppColors.primary : AppColors.primary.withOpacity(0.7),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: isDarkMode ? Colors.grey.shade800.withOpacity(0.5) : Colors.grey.shade100,
-                  ),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Password field
-                TextField(
+                CustomTextField(
                   controller: _passwordController,
+                  labelText: 'Password',
+                  hintText: 'Enter your password',
+                  prefixIcon: Icons.lock_outline,
                   obscureText: !_isPasswordVisible,
-                  style: TextStyle(color: textColor),
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    hintText: 'Enter your password',
-                    prefixIcon: Icon(
-                      Icons.lock_outline_rounded,
-                      color: isDarkMode ? AppColors.primary : AppColors.primary.withOpacity(0.7),
+                  suffix: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey,
+                      size: 20,
                     ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                        color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: isDarkMode ? Colors.grey.shade800.withOpacity(0.5) : Colors.grey.shade100,
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Remember me and Forgot password
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -171,35 +154,27 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text(
                           'Remember me',
                           style: TextStyle(
-                            color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+                            color: isDarkMode
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade700,
                             fontSize: 14,
                           ),
                         ),
                       ],
                     ),
-                    TextButton(
+                    CustomButton(
+                      text: 'Forgot Password?',
+                      type: ButtonType.text,
+                      isFullWidth: false,
                       onPressed: () {
-                        // Navigate to forgot password
                         Navigator.pushNamed(context, RouteNames.forgotPassword);
                       },
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(0, 0),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text(
-                        'Forgot Password?',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Login button
                 SizedBox(
                   width: double.infinity,
@@ -230,31 +205,39 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Social login options
                 Column(
                   children: [
                     Row(
                       children: [
-                        Expanded(child: Divider(color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300)),
+                        Expanded(
+                            child: Divider(
+                                color: isDarkMode
+                                    ? Colors.grey.shade700
+                                    : Colors.grey.shade300)),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             'Or continue with',
                             style: TextStyle(
-                              color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                              color: isDarkMode
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600,
                               fontSize: 14,
                             ),
                           ),
                         ),
-                        Expanded(child: Divider(color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300)),
+                        Expanded(
+                            child: Divider(
+                                color: isDarkMode
+                                    ? Colors.grey.shade700
+                                    : Colors.grey.shade300)),
                       ],
                     ),
-                    
                     const SizedBox(height: 24),
-                    
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -288,9 +271,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Sign up link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -298,7 +281,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Don\'t have an account?',
                       style: TextStyle(
-                        color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+                        color: isDarkMode
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade700,
                       ),
                     ),
                     TextButton(
@@ -326,7 +311,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-  
+
   Widget _socialLoginButton({
     required IconData icon,
     required Color color,
@@ -340,7 +325,9 @@ class _LoginScreenState extends State<LoginScreen> {
         width: 60,
         height: 60,
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.grey.shade800.withOpacity(0.5) : Colors.grey.shade100,
+          color: isDarkMode
+              ? Colors.grey.shade800.withOpacity(0.5)
+              : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(

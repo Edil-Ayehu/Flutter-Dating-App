@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dating_app/core/widgets/custom_button.dart';
 import '../../../core/constants/text_styles.dart';
 import '../../../core/constants/color_constants.dart';
 import '../../../routes/route_names.dart';
@@ -36,7 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: isDarkMode 
+            colors: isDarkMode
                 ? [AppColors.cardDark, AppColors.backgroundDark]
                 : [Colors.white, Colors.grey.shade50],
             stops: const [0.0, 0.3],
@@ -59,9 +60,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Create account text
                 Text(
                   'Create Account',
@@ -70,18 +71,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 Text(
                   'Find your perfect match today',
                   style: AppTextStyles.bodyMediumLight.copyWith(
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+                    color: isDarkMode
+                        ? Colors.grey.shade400
+                        : Colors.grey.shade700,
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Name field
                 TextField(
                   controller: _nameController,
@@ -89,14 +92,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'Full Name',
                     prefixIcon: Icon(
                       Icons.person_outline,
-                      color: isDarkMode ? AppColors.primary : AppColors.primary.withOpacity(0.7),
+                      color: isDarkMode
+                          ? AppColors.primary
+                          : AppColors.primary.withOpacity(0.7),
                     ),
                   ),
                   style: TextStyle(color: textColor),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Email field
                 TextField(
                   controller: _emailController,
@@ -105,14 +110,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'Email Address',
                     prefixIcon: Icon(
                       Icons.email_outlined,
-                      color: isDarkMode ? AppColors.primary : AppColors.primary.withOpacity(0.7),
+                      color: isDarkMode
+                          ? AppColors.primary
+                          : AppColors.primary.withOpacity(0.7),
                     ),
                   ),
                   style: TextStyle(color: textColor),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Password field
                 TextField(
                   controller: _passwordController,
@@ -121,12 +128,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'Password',
                     prefixIcon: Icon(
                       Icons.lock_outline,
-                      color: isDarkMode ? AppColors.primary : AppColors.primary.withOpacity(0.7),
+                      color: isDarkMode
+                          ? AppColors.primary
+                          : AppColors.primary.withOpacity(0.7),
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-                        color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                        _isPasswordVisible
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: isDarkMode
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                       ),
                       onPressed: () {
                         setState(() {
@@ -137,9 +150,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   style: TextStyle(color: textColor),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Terms and conditions checkbox
                 Row(
                   children: [
@@ -164,7 +177,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: RichText(
                         text: TextSpan(
                           style: TextStyle(
-                            color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+                            color: isDarkMode
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade700,
                             fontSize: 14,
                           ),
                           children: [
@@ -190,44 +205,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Sign up button
-                ElevatedButton(
-                  onPressed: _agreeToTerms ? () {
-                    // Handle sign up
-                    Navigator.pushNamed(context, RouteNames.verification);
-                  } : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
-                    disabledBackgroundColor: isDarkMode 
-                        ? Colors.grey.shade800 
-                        : Colors.grey.shade300,
-                  ),
-                  child: const Text(
-                    'Create Account',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                CustomButton(
+                  text: 'Create Account',
+                  onPressed: _agreeToTerms
+                      ? () {
+                          Navigator.pushNamed(context, RouteNames.verification);
+                        }
+                      : null,
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Or divider
                 Row(
                   children: [
                     Expanded(
                       child: Divider(
-                        color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade300,
+                        color: isDarkMode
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade300,
                         thickness: 1,
                       ),
                     ),
@@ -236,22 +236,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Text(
                         'Or sign up with',
                         style: TextStyle(
-                          color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+                          color: isDarkMode
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade700,
                           fontSize: 14,
                         ),
                       ),
                     ),
                     Expanded(
                       child: Divider(
-                        color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade300,
+                        color: isDarkMode
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade300,
                         thickness: 1,
                       ),
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Social login buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -284,9 +288,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Sign in link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -294,12 +298,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Text(
                       'Already have an account?',
                       style: TextStyle(
-                        color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+                        color: isDarkMode
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade700,
                       ),
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.pushReplacementNamed(context, RouteNames.login);
+                        Navigator.pushReplacementNamed(
+                            context, RouteNames.login);
                       },
                       style: TextButton.styleFrom(
                         foregroundColor: AppColors.primary,
@@ -321,7 +328,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
-  
+
   Widget _socialSignUpButton({
     required IconData icon,
     required Color color,
@@ -335,7 +342,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         width: 60,
         height: 60,
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.grey.shade800.withOpacity(0.5) : Colors.grey.shade100,
+          color: isDarkMode
+              ? Colors.grey.shade800.withOpacity(0.5)
+              : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(

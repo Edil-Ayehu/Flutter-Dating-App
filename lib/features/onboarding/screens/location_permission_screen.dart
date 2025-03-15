@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dating_app/core/widgets/custom_button.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/string_constants.dart';
 import '../../../core/constants/text_styles.dart';
@@ -21,7 +22,7 @@ class LocationPermissionScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: isDarkMode 
+            colors: isDarkMode
                 ? [AppColors.cardDark, AppColors.backgroundDark]
                 : [Colors.white, Colors.grey.shade50],
             stops: const [0.0, 0.3],
@@ -41,7 +42,7 @@ class LocationPermissionScreen extends StatelessWidget {
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: isDarkMode 
+                          color: isDarkMode
                               ? AppColors.primary.withOpacity(0.15)
                               : AppColors.primary.withOpacity(0.1),
                           shape: BoxShape.circle,
@@ -65,75 +66,42 @@ class LocationPermissionScreen extends StatelessWidget {
                       Text(
                         'We use your location to show you potential matches in your area',
                         style: AppTextStyles.bodyMediumLight.copyWith(
-                          color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+                          color: isDarkMode
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade700,
                         ),
                         textAlign: TextAlign.center,
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Buttons at the bottom
                 Container(
                   margin: const EdgeInsets.only(bottom: 40),
                   child: Column(
                     children: [
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            // TODO: Implement actual location permission request
-                            provider.setLocationPermission(true);
-                            await provider.saveOnboardingData();
-                            Navigator.pushNamedAndRemoveUntil(
-                              context,
-                              RouteNames.login,
-                              (route) => false,
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            'Allow Location Access',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextButton(
+                      CustomButton(
+                        text: 'Allow Location Access',
+                        icon: Icons.location_on,
                         onPressed: () async {
-                          provider.setLocationPermission(false);
+                          // TODO: Implement actual location permission request
+                          provider.setLocationPermission(true);
                           await provider.saveOnboardingData();
                           Navigator.pushNamedAndRemoveUntil(
                             context,
-                            RouteNames.home,
+                            RouteNames.login,
                             (route) => false,
                           );
                         },
-                        style: TextButton.styleFrom(
-                          foregroundColor: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          'Skip for now',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      CustomButton(
+                        text: 'Skip for now',
+                        type: ButtonType.secondary,
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                       ),
                     ],
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dating_app/core/widgets/custom_button.dart';
 import 'dart:async';
 import '../../../core/constants/text_styles.dart';
 import '../../../core/constants/color_constants.dart';
@@ -13,23 +14,23 @@ class VerificationScreen extends StatefulWidget {
 
 class _VerificationScreenState extends State<VerificationScreen> {
   final List<TextEditingController> _controllers = List.generate(
-    4, 
+    4,
     (_) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(
-    4, 
+    4,
     (_) => FocusNode(),
   );
-  
+
   int _resendSeconds = 60;
   Timer? _timer;
   bool _isVerifying = false;
-  
+
   @override
   void initState() {
     super.initState();
     _startResendTimer();
-    
+
     // Set up focus node listeners
     for (int i = 0; i < _focusNodes.length; i++) {
       _controllers[i].addListener(() {
@@ -40,7 +41,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
       });
     }
   }
-  
+
   void _startResendTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
@@ -52,31 +53,31 @@ class _VerificationScreenState extends State<VerificationScreen> {
       });
     });
   }
-  
+
   void _verifyCode() {
     setState(() {
       _isVerifying = true;
     });
-    
+
     // Simulate verification
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushNamedAndRemoveUntil(
-        context, 
-        RouteNames.onboarding, 
+        context,
+        RouteNames.onboarding,
         (route) => false,
       );
     });
   }
-  
+
   void _resendCode() {
     setState(() {
       _resendSeconds = 60;
     });
     _startResendTimer();
-    
+
     // Resend code logic
   }
-  
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -100,7 +101,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: isDarkMode 
+            colors: isDarkMode
                 ? [AppColors.cardDark, AppColors.backgroundDark]
                 : [Colors.white, Colors.grey.shade50],
             stops: const [0.0, 0.3],
@@ -123,9 +124,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Verification text
                 Text(
                   'Verification',
@@ -134,18 +135,20 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 Text(
                   'We\'ve sent a verification code to your email address',
                   style: AppTextStyles.bodyMediumLight.copyWith(
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+                    color: isDarkMode
+                        ? Colors.grey.shade400
+                        : Colors.grey.shade700,
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Verification illustration
                 Center(
                   child: Container(
@@ -162,9 +165,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // OTP input fields
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -187,8 +190,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
                         decoration: InputDecoration(
                           counterText: '',
                           filled: true,
-                          fillColor: isDarkMode 
-                              ? Colors.grey.shade800.withOpacity(0.5) 
+                          fillColor: isDarkMode
+                              ? Colors.grey.shade800.withOpacity(0.5)
                               : Colors.grey.shade100,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -205,48 +208,26 @@ class _VerificationScreenState extends State<VerificationScreen> {
                         onChanged: (value) {
                           if (value.isEmpty && index > 0) {
                             _focusNodes[index].unfocus();
-                            FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
+                            FocusScope.of(context)
+                                .requestFocus(_focusNodes[index - 1]);
                           }
                         },
                       ),
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Verify button
-                ElevatedButton(
-                  onPressed: _isVerifying ? null : _verifyCode,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: _isVerifying 
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text(
-                          'Verify',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                CustomButton(
+                  text: 'Verify',
+                  isLoading: _isVerifying,
+                  onPressed: _verifyCode,
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Resend code
                 Center(
                   child: Column(
@@ -254,7 +235,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       Text(
                         'Didn\'t receive the code?',
                         style: TextStyle(
-                          color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+                          color: isDarkMode
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade700,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -266,7 +249,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
                               : 'Resend Code',
                           style: TextStyle(
                             color: _resendSeconds > 0
-                                ? isDarkMode ? Colors.grey.shade500 : Colors.grey.shade600
+                                ? isDarkMode
+                                    ? Colors.grey.shade500
+                                    : Colors.grey.shade600
                                 : AppColors.primary,
                             fontWeight: FontWeight.w600,
                           ),
@@ -275,9 +260,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     ],
                   ),
                 ),
-                
+
                 const Spacer(),
-                
+
                 // Need help text
                 Center(
                   child: TextButton(
@@ -287,7 +272,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     child: Text(
                       'Need help? Contact Support',
                       style: TextStyle(
-                        color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+                        color: isDarkMode
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade700,
                         fontSize: 14,
                       ),
                     ),
