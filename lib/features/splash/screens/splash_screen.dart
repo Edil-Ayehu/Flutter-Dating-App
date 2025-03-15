@@ -3,6 +3,7 @@ import 'dart:async';
 import '../../../core/constants/color_constants.dart';
 import '../../../core/constants/string_constants.dart';
 import '../../../core/constants/text_styles.dart';
+import '../../../core/services/preferences_service.dart';
 import '../../../routes/route_names.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -53,10 +54,55 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     
     _animationController.forward();
     
-    // Navigate to welcome screen after delay
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, RouteNames.welcome);
+    // Navigate to appropriate screen after delay
+    _navigateToNextScreen();
+  }
+  
+  Future<void> _navigateToNextScreen() async {
+    // Set a timeout to ensure we don't get stuck
+    bool hasNavigated = false;
+    
+    // Create a timeout that will trigger after 5 seconds
+    Timer(const Duration(seconds: 5), () {
+      if (mounted && !hasNavigated) {
+        hasNavigated = true;
+        debugPrint('⏱️ Navigation timeout triggered - going to welcome screen');
+        Navigator.pushReplacementNamed(context, RouteNames.welcome);
+      }
     });
+    
+    try {
+      await Future.delayed(const Duration(seconds: 3));
+      
+      if (!mounted || hasNavigated) return;
+      
+      // Check if user has seen welcome screen
+      bool hasSeenWelcome = false;
+      try {
+        hasSeenWelcome = await PreferencesService.hasSeenWelcome();
+        debugPrint('🔍 Has user seen welcome screen? $hasSeenWelcome');
+      } catch (e) {
+        debugPrint('❌ Error checking welcome screen status: $e');
+        hasSeenWelcome = false;
+      }
+      
+      if (hasNavigated) return; // Don't navigate if timeout already triggered
+      hasNavigated = true;
+      
+      if (hasSeenWelcome) {
+        debugPrint('➡️ Navigating to login screen');
+        Navigator.pushReplacementNamed(context, RouteNames.login);
+      } else {
+        debugPrint('➡️ Navigating to welcome screen');
+        Navigator.pushReplacementNamed(context, RouteNames.welcome);
+      }
+    } catch (e) {
+      debugPrint('❌ Error in splash navigation: $e');
+      if (mounted && !hasNavigated) {
+        hasNavigated = true;
+        Navigator.pushReplacementNamed(context, RouteNames.welcome);
+      }
+    }
   }
 
   @override

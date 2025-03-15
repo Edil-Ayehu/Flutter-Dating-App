@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/string_constants.dart';
 import '../../../core/constants/text_styles.dart';
 import '../../../core/constants/color_constants.dart';
+import '../../../core/services/preferences_service.dart';
 import '../../../routes/route_names.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -89,10 +91,23 @@ class WelcomeScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       ElevatedButton(
-                        onPressed: () => Navigator.pushNamed(
-                          context,
-                          RouteNames.signup,
-                        ),
+                        onPressed: () async {
+                          try {
+                            debugPrint('🔘 Create Account button pressed');
+                            // Mark welcome screen as seen
+                            await PreferencesService.setWelcomeSeen();
+                            
+                            if (context.mounted) {
+                              debugPrint('➡️ Navigating to signup screen');
+                              Navigator.pushReplacementNamed(
+                                context,
+                                RouteNames.signup,
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint('❌ Error in welcome screen navigation: $e');
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isDarkMode ? AppColors.primary : Colors.white,
                           foregroundColor: isDarkMode ? Colors.white : AppColors.primary,
@@ -112,10 +127,23 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       TextButton(
-                        onPressed: () => Navigator.pushNamed(
-                          context,
-                          RouteNames.login,
-                        ),
+                        onPressed: () async {
+                          try {
+                            debugPrint('🔘 Sign In button pressed');
+                            // Mark welcome screen as seen
+                            await PreferencesService.setWelcomeSeen();
+                            
+                            if (context.mounted) {
+                              debugPrint('➡️ Navigating to login screen');
+                              Navigator.pushReplacementNamed(
+                                context,
+                                RouteNames.login,
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint('❌ Error in welcome screen navigation: $e');
+                          }
+                        },
                         child: const Text(
                           "Already have an account? Sign In",
                           style: TextStyle(
