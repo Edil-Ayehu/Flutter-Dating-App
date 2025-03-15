@@ -90,7 +90,7 @@ class LocationPermissionScreen extends StatelessWidget {
                           await provider.saveOnboardingData();
                           Navigator.pushNamedAndRemoveUntil(
                             context,
-                            RouteNames.login,
+                            RouteNames.home,
                             (route) => false,
                           );
                         },

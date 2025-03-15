@@ -24,6 +24,7 @@ class CustomTextField extends StatelessWidget {
   final bool readOnly;
   final VoidCallback? onTap;
   final EdgeInsetsGeometry? contentPadding;
+  final double? height;
 
   const CustomTextField({
     Key? key,
@@ -48,6 +49,7 @@ class CustomTextField extends StatelessWidget {
     this.readOnly = false,
     this.onTap,
     this.contentPadding,
+    this.height = 60,
   }) : super(key: key);
 
   @override
@@ -55,87 +57,90 @@ class CustomTextField extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkMode ? Colors.white : AppColors.textPrimaryLight;
     
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      enabled: enabled,
-      keyboardType: keyboardType,
-      textInputAction: textInputAction,
-      maxLength: maxLength,
-      maxLines: maxLines,
-      inputFormatters: inputFormatters,
-      onChanged: onChanged,
-      onFieldSubmitted: onSubmitted,
-      focusNode: focusNode,
-      validator: validator,
-      autofocus: autofocus,
-      readOnly: readOnly,
-      onTap: onTap,
-      style: TextStyle(color: textColor),
-      decoration: InputDecoration(
-        labelText: labelText,
-        hintText: hintText,
-        errorText: errorText,
-        prefixIcon: prefixIcon != null 
-            ? Icon(
-                prefixIcon,
-                color: isDarkMode ? AppColors.primary : AppColors.primary.withOpacity(0.7),
-              ) 
-            : null,
-        suffix: suffix,
-        contentPadding: contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        filled: true,
-        fillColor: isDarkMode 
-            ? Colors.grey.shade800.withOpacity(0.3) 
-            : Colors.grey.shade100.withOpacity(0.7),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-            width: 1,
+    return Container(
+      height: height,
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscureText,
+        enabled: enabled,
+        keyboardType: keyboardType,
+        textInputAction: textInputAction,
+        maxLength: maxLength,
+        maxLines: maxLines,
+        inputFormatters: inputFormatters,
+        onChanged: onChanged,
+        onFieldSubmitted: onSubmitted,
+        focusNode: focusNode,
+        validator: validator,
+        autofocus: autofocus,
+        readOnly: readOnly,
+        onTap: onTap,
+        style: TextStyle(color: textColor),
+        decoration: InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          errorText: errorText,
+          prefixIcon: prefixIcon != null 
+              ? Icon(
+                  prefixIcon,
+                  color: isDarkMode ? AppColors.primary : AppColors.primary.withOpacity(0.7),
+                ) 
+              : null,
+          suffix: suffix,
+          contentPadding: contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          filled: true,
+          fillColor: isDarkMode 
+              ? Colors.grey.shade800.withOpacity(0.3) 
+              : Colors.grey.shade100.withOpacity(0.7),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
           ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.primary,
-            width: 1.5,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+              width: 1,
+            ),
           ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: AppColors.primary,
+              width: 1.5,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: AppColors.error,
+              width: 1,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: AppColors.error,
+              width: 1.5,
+            ),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+              width: 1,
+            ),
+          ),
+          labelStyle: TextStyle(
+            color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+          ),
+          hintStyle: TextStyle(
+            color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade500,
+          ),
+          errorStyle: const TextStyle(
             color: AppColors.error,
-            width: 1,
+            fontSize: 12,
           ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.error,
-            width: 1.5,
-          ),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
-            width: 1,
-          ),
-        ),
-        labelStyle: TextStyle(
-          color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-        ),
-        hintStyle: TextStyle(
-          color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade500,
-        ),
-        errorStyle: const TextStyle(
-          color: AppColors.error,
-          fontSize: 12,
         ),
       ),
     );

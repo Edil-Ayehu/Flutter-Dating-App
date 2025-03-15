@@ -18,7 +18,7 @@ class WelcomeScreen extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: isDarkMode 
-                ? [Colors.black, Color(0xFF1A1A2E), Color(0xFF16213E)]
+                ? [Colors.black, const Color(0xFF1A1A2E), const Color(0xFF16213E)]
                 : AppColors.primaryGradient,
           ),
         ),
@@ -86,27 +86,45 @@ class WelcomeScreen extends StatelessWidget {
                 ),
                 Container(
                   margin: const EdgeInsets.only(bottom: 40),
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pushNamed(
-                      context,
-                      RouteNames.onboarding,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isDarkMode ? AppColors.primary : Colors.white,
-                      foregroundColor: isDarkMode ? Colors.white : AppColors.primary,
-                      minimumSize: const Size(double.infinity, 56),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                  child: Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.pushNamed(
+                          context,
+                          RouteNames.signup,
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDarkMode ? AppColors.primary : Colors.white,
+                          foregroundColor: isDarkMode ? Colors.white : AppColors.primary,
+                          minimumSize: const Size(double.infinity, 56),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Text(
+                          "Create Account",
+                          style: AppTextStyles.buttonLarge.copyWith(
+                            color: isDarkMode ? Colors.white : AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      AppStrings.getStarted,
-                      style: AppTextStyles.buttonLarge.copyWith(
-                        color: isDarkMode ? Colors.white : AppColors.primary,
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () => Navigator.pushNamed(
+                          context,
+                          RouteNames.login,
+                        ),
+                        child: const Text(
+                          "Already have an account? Sign In",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ],

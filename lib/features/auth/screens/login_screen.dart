@@ -176,34 +176,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 32),
 
                 // Login button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Implement login logic
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        RouteNames.home,
-                        (route) => false,
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Sign In',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                CustomButton(
+                  text: 'Sign In',
+                  onPressed: () {
+                    // Implement login logic
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      RouteNames.home,
+                      (route) => false,
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 24),
