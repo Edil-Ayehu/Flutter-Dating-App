@@ -182,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Implement login logic
                     Navigator.pushNamedAndRemoveUntil(
                       context,
-                      RouteNames.home,
+                      RouteNames.discover,
                       (route) => false,
                     );
                   },

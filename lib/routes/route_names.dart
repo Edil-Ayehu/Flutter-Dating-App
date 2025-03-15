@@ -17,6 +17,13 @@ class RouteNames {
   static const String locationPermission = '/location-permission';
   
   // Main App Routes
-  static const String home = '/home';
+  // static const String home = '/home';
+  static const String discover = '/discover';
+  static const String chatList = '/chat-list';
+  static const String chat = '/chat';
+  static const String profile = '/profile';
+  static const String editProfile = '/edit-profile';
+  static const String notifications = '/notifications';
+  static const String settings = '/settings';
 
 }

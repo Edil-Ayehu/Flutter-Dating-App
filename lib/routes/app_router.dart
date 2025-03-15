@@ -3,13 +3,18 @@ import 'package:flutter_dating_app/features/auth/screens/forgot_password_screen.
 import 'package:flutter_dating_app/features/auth/screens/login_screen.dart';
 import 'package:flutter_dating_app/features/auth/screens/registeration_screen.dart';
 import 'package:flutter_dating_app/features/auth/screens/verification_screen.dart';
+import 'package:flutter_dating_app/features/chat/screens/chat_list_screens.dart';
 import 'package:flutter_dating_app/features/splash/screens/splash_screen.dart';
+import 'package:flutter_dating_app/features/matching/screens/discover_screen.dart';
+import 'package:flutter_dating_app/features/profile/screens/profile_screen.dart';
+import 'package:flutter_dating_app/features/notifications/screens/notifications_screen.dart';
 import 'route_names.dart';
 import '../features/onboarding/screens/welcome_screen.dart';
 import '../features/onboarding/screens/profile_setup_screen.dart';
 import '../features/onboarding/screens/photo_upload_screen.dart';
 import '../features/onboarding/screens/interests_screen.dart';
 import '../features/onboarding/screens/location_permission_screen.dart';
+
 
 class AppRouter {
   static String get initialRoute => RouteNames.splash;
@@ -45,6 +50,19 @@ class AppRouter {
       
       case RouteNames.locationPermission:
         return MaterialPageRoute(builder: (_) => const LocationPermissionScreen());
+      
+      // Main app routes
+      case RouteNames.discover:
+        return MaterialPageRoute(builder: (_) => const DiscoverScreen());
+        
+      case RouteNames.chatList:
+        return MaterialPageRoute(builder: (_) => const ChatListScreen());
+        
+      case RouteNames.profile:
+        return MaterialPageRoute(builder: (_) => const ProfileScreen());
+        
+      case RouteNames.notifications:
+        return MaterialPageRoute(builder: (_) => const NotificationsScreen());
       
       default:
         return MaterialPageRoute(

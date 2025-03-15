@@ -76,23 +76,33 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       
       if (!mounted || hasNavigated) return;
       
-      // Check if user has seen welcome screen
+      // Check if user has seen welcome screen and is logged in
       bool hasSeenWelcome = false;
+      bool isLoggedIn = false;
+      
       try {
         hasSeenWelcome = await PreferencesService.hasSeenWelcome();
+        // You should also check if user is logged in
+        // isLoggedIn = await AuthService.isLoggedIn();
         debugPrint('🔍 Has user seen welcome screen? $hasSeenWelcome');
+        debugPrint('🔍 Is user logged in? $isLoggedIn');
       } catch (e) {
-        debugPrint('❌ Error checking welcome screen status: $e');
-        hasSeenWelcome = false;
+        debugPrint('❌ Error checking user status: $e');
       }
       
-      if (hasNavigated) return; // Don't navigate if timeout already triggered
+      if (hasNavigated) return;
       hasNavigated = true;
       
-      if (hasSeenWelcome) {
+      if (isLoggedIn) {
+        // User is logged in, go directly to discover screen (home)
+        debugPrint('➡️ User is logged in. Navigating to discover screen');
+        Navigator.pushReplacementNamed(context, RouteNames.discover);
+      } else if (hasSeenWelcome) {
+        // User has seen welcome but not logged in
         debugPrint('➡️ Navigating to login screen');
         Navigator.pushReplacementNamed(context, RouteNames.login);
       } else {
+        // First time user
         debugPrint('➡️ Navigating to welcome screen');
         Navigator.pushReplacementNamed(context, RouteNames.welcome);
       }
