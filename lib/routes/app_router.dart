@@ -4,6 +4,7 @@ import 'package:flutter_dating_app/features/auth/screens/login_screen.dart';
 import 'package:flutter_dating_app/features/auth/screens/registeration_screen.dart';
 import 'package:flutter_dating_app/features/auth/screens/verification_screen.dart';
 import 'package:flutter_dating_app/features/chat/screens/chat_list_screens.dart';
+import 'package:flutter_dating_app/features/matching/models/match_result.dart';
 import 'package:flutter_dating_app/features/splash/screens/splash_screen.dart';
 import 'package:flutter_dating_app/features/matching/screens/discover_screen.dart';
 import 'package:flutter_dating_app/features/profile/screens/profile_screen.dart';
@@ -14,6 +15,9 @@ import '../features/onboarding/screens/profile_setup_screen.dart';
 import '../features/onboarding/screens/photo_upload_screen.dart';
 import '../features/onboarding/screens/interests_screen.dart';
 import '../features/onboarding/screens/location_permission_screen.dart';
+import '../features/matching/screens/filter_screen.dart';
+import '../features/matching/screens/match_details_screen.dart';
+
 
 
 class AppRouter {
@@ -63,6 +67,13 @@ class AppRouter {
         
       case RouteNames.notifications:
         return MaterialPageRoute(builder: (_) => const NotificationsScreen());
+      
+      case RouteNames.filter:
+        return MaterialPageRoute(builder: (_) => const FilterScreen());
+        
+      case RouteNames.matchDetails:
+        final MatchResult match = settings.arguments as MatchResult;
+        return MaterialPageRoute(builder: (_) => MatchDetailsScreen(match: match));
       
       default:
         return MaterialPageRoute(
