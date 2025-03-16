@@ -3,7 +3,10 @@ import 'package:flutter_dating_app/features/auth/screens/forgot_password_screen.
 import 'package:flutter_dating_app/features/auth/screens/login_screen.dart';
 import 'package:flutter_dating_app/features/auth/screens/registeration_screen.dart';
 import 'package:flutter_dating_app/features/auth/screens/verification_screen.dart';
+import 'package:flutter_dating_app/features/chat/models/chat_room.dart';
 import 'package:flutter_dating_app/features/chat/screens/chat_list_screens.dart';
+import 'package:flutter_dating_app/features/chat/screens/chat_screen.dart';
+import 'package:flutter_dating_app/features/chat/screens/match_preview_screen.dart';
 import 'package:flutter_dating_app/features/matching/models/match_result.dart';
 import 'package:flutter_dating_app/features/splash/screens/splash_screen.dart';
 import 'package:flutter_dating_app/features/matching/screens/discover_screen.dart';
@@ -74,6 +77,14 @@ class AppRouter {
       case RouteNames.matchDetails:
         final MatchResult match = settings.arguments as MatchResult;
         return MaterialPageRoute(builder: (_) => MatchDetailsScreen(match: match));
+
+      case RouteNames.chat:
+        final ChatRoom chatRoom = settings.arguments as ChatRoom;
+        return MaterialPageRoute(builder: (_) => ChatScreen(chatRoom: chatRoom));
+        
+      case RouteNames.matchPreview:
+        final MatchResult match = settings.arguments as MatchResult;
+        return MaterialPageRoute(builder: (_) => MatchPreviewScreen(match: match));
       
       default:
         return MaterialPageRoute(

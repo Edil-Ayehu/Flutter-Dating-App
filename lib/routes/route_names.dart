@@ -29,4 +29,7 @@ class RouteNames {
   static const String filter = '/filter';
   static const String matchDetails = '/match-details';
 
+    // Chat Routes
+  static const String matchPreview = '/match-preview';
+
 }
