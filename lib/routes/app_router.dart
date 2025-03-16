@@ -6,6 +6,7 @@ import 'package:flutter_dating_app/features/auth/screens/verification_screen.dar
 import 'package:flutter_dating_app/features/chat/models/chat_room.dart';
 import 'package:flutter_dating_app/features/chat/screens/chat_list_screens.dart';
 import 'package:flutter_dating_app/features/chat/screens/chat_screen.dart';
+import 'package:flutter_dating_app/features/chat/screens/chat_search_screen.dart';
 import 'package:flutter_dating_app/features/chat/screens/match_preview_screen.dart';
 import 'package:flutter_dating_app/features/matching/models/match_result.dart';
 import 'package:flutter_dating_app/features/splash/screens/splash_screen.dart';
@@ -21,8 +22,6 @@ import '../features/onboarding/screens/location_permission_screen.dart';
 import '../features/matching/screens/filter_screen.dart';
 import '../features/matching/screens/match_details_screen.dart';
 
-
-
 class AppRouter {
   static String get initialRoute => RouteNames.splash;
 
@@ -37,55 +36,61 @@ class AppRouter {
       case RouteNames.login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
 
-            case RouteNames.signup:
+      case RouteNames.signup:
         return MaterialPageRoute(builder: (_) => const RegisterScreen());
-        
+
       case RouteNames.forgotPassword:
         return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
-        
+
       case RouteNames.verification:
         return MaterialPageRoute(builder: (_) => const VerificationScreen());
-      
+
       case RouteNames.onboarding:
         return MaterialPageRoute(builder: (_) => const ProfileSetupScreen());
-      
+
       case RouteNames.photoUpload:
         return MaterialPageRoute(builder: (_) => const PhotoUploadScreen());
-      
+
       case RouteNames.interests:
         return MaterialPageRoute(builder: (_) => const InterestsScreen());
-      
+
       case RouteNames.locationPermission:
-        return MaterialPageRoute(builder: (_) => const LocationPermissionScreen());
-      
+        return MaterialPageRoute(
+            builder: (_) => const LocationPermissionScreen());
+
       // Main app routes
       case RouteNames.discover:
         return MaterialPageRoute(builder: (_) => const DiscoverScreen());
-        
+
       case RouteNames.chatList:
         return MaterialPageRoute(builder: (_) => const ChatListScreen());
-        
+
       case RouteNames.profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
-        
+
       case RouteNames.notifications:
         return MaterialPageRoute(builder: (_) => const NotificationsScreen());
-      
+
       case RouteNames.filter:
         return MaterialPageRoute(builder: (_) => const FilterScreen());
-        
+
       case RouteNames.matchDetails:
         final MatchResult match = settings.arguments as MatchResult;
-        return MaterialPageRoute(builder: (_) => MatchDetailsScreen(match: match));
+        return MaterialPageRoute(
+            builder: (_) => MatchDetailsScreen(match: match));
 
       case RouteNames.chat:
         final ChatRoom chatRoom = settings.arguments as ChatRoom;
-        return MaterialPageRoute(builder: (_) => ChatScreen(chatRoom: chatRoom));
-        
+        return MaterialPageRoute(
+            builder: (_) => ChatScreen(chatRoom: chatRoom));
+      case RouteNames.chatSearch:
+        return MaterialPageRoute(builder: (_) => const ChatSearchScreen());
+
       case RouteNames.matchPreview:
         final MatchResult match = settings.arguments as MatchResult;
-        return MaterialPageRoute(builder: (_) => MatchPreviewScreen(match: match));
-      
+        return MaterialPageRoute(
+            builder: (_) => MatchPreviewScreen(match: match));
+
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

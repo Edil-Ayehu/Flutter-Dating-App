@@ -31,5 +31,6 @@ class RouteNames {
 
     // Chat Routes
   static const String matchPreview = '/match-preview';
+  static const String chatSearch = '/chat-search';
 
 }

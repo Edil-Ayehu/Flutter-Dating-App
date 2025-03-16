@@ -143,11 +143,45 @@ class ChatListScreen extends StatelessWidget {
           actions: [
             IconButton(
               icon: Icon(
-                Icons.search_rounded,
-                color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
+                Icons.search,
+                color: isDarkMode ? Colors.white : Colors.grey.shade800,
               ),
-              onPressed: () {
-                // Search functionality
+              onPressed: () async {
+                final result = await Navigator.pushNamed(
+                  context, 
+                  RouteNames.chatSearch
+                );
+                
+                if (result != null && result is String) {
+                  // Get the conversation ID from search result
+                  final conversationId = result;
+                  
+                  // Find the conversation in your list
+                  final selectedConversation = conversations.firstWhere(
+                    (conv) => conv['id'] == conversationId,
+                    orElse: () => conversations.first,
+                  );
+                  
+                  // Create a ChatRoom object from the conversation data
+                  final chatRoom = ChatRoom(
+                    id: selectedConversation['id'],
+                    userId: 'current_user',
+                    matchId: selectedConversation['id'],
+                    matchName: selectedConversation['name'],
+                    matchImage: selectedConversation['image'],
+                    isMatchOnline: selectedConversation['isOnline'] ?? false,
+                    createdAt: DateTime.now().subtract(const Duration(days: 1)),
+                    lastActivity: DateTime.now(),
+                    unreadCount: selectedConversation['unread'] ?? 0,
+                  );
+                  
+                  // Navigate to chat screen with the chat room
+                  Navigator.pushNamed(
+                    context,
+                    RouteNames.chat,
+                    arguments: chatRoom,
+                  );
+                }
               },
             ),
           ],
@@ -172,9 +206,10 @@ class ChatListScreen extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        // View all matches
+                        // Navigate to discover screen to see all potential matches
+                        Navigator.pushNamed(context, RouteNames.discover);
                       },
-                      child: Text(
+                      child: const Text(
                         'See All',
                         style: TextStyle(
                           color: AppColors.primary,
@@ -207,7 +242,7 @@ class ChatListScreen extends StatelessWidget {
                               children: [
                                 Container(
                                   padding: const EdgeInsets.all(3),
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
                                     gradient: LinearGradient(
                                       colors: [
@@ -528,7 +563,7 @@ class ChatListScreen extends StatelessWidget {
                                               Container(
                                                 padding:
                                                     const EdgeInsets.all(6),
-                                                decoration: BoxDecoration(
+                                                decoration: const BoxDecoration(
                                                   color: AppColors.primary,
                                                   shape: BoxShape.circle,
                                                 ),
