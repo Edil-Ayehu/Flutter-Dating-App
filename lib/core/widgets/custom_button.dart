@@ -133,11 +133,11 @@ class CustomButton extends StatelessWidget {
   EdgeInsetsGeometry _getPadding() {
     switch (size) {
       case ButtonSize.small:
-        return const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
+        return const EdgeInsets.symmetric(horizontal: 16, vertical: 12);
       case ButtonSize.medium:
-        return const EdgeInsets.symmetric(horizontal: 24, vertical: 12);
+        return const EdgeInsets.symmetric(horizontal: 24, vertical: 16);
       case ButtonSize.large:
-        return const EdgeInsets.symmetric(horizontal: 32, vertical: 16);
+        return const EdgeInsets.symmetric(horizontal: 32, vertical: 20);
     }
   }
   
