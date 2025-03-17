@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dating_app/routes/route_names.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/color_constants.dart';
 import '../../../shared/layouts/main_layout.dart';
@@ -7,6 +8,7 @@ import '../providers/notification_provider.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -203,22 +205,131 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 
-  void _handleNotificationTap(BuildContext context, NotificationModel notification) {
-    // Navigate to appropriate screen based on notification type
-    switch (notification.type) {
-      case NotificationType.match:
-        // Navigate to match profile or chat
-        break;
-      case NotificationType.like:
-        // Navigate to likes screen or profile
-        break;
-      case NotificationType.message:
-        // Navigate to chat screen
-        break;
-      case NotificationType.system:
-        // Handle system notifications
-        break;
+  void _handleNotificationTap(BuildContext context, NotificationModel notification) async {
+    final provider = Provider.of<NotificationProvider>(context, listen: false);
+    
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    
+    try {
+      switch (notification.type) {
+        case NotificationType.match:
+          // Get match data and navigate to match details
+          final match = await provider.getMatchForNotification(notification.id);
+          if (context.mounted) {
+            Navigator.pop(context); // Remove loading dialog
+            if (match != null) {
+              Navigator.pushNamed(
+                context, 
+                RouteNames.matchDetails,
+                arguments: match,
+              );
+            } else {
+              // Fallback if match data couldn't be retrieved
+              Navigator.pushNamed(context, RouteNames.discover);
+            }
+          }
+          break;
+        
+        case NotificationType.like:
+          // For likes, navigate to discover screen
+          if (context.mounted) {
+            Navigator.pop(context); // Remove loading dialog
+            Navigator.pushNamed(context, RouteNames.discover);
+          }
+          break;
+        
+        case NotificationType.message:
+          // Get chat room data and navigate to chat
+          final chatRoom = await provider.getChatRoomForNotification(notification.id);
+          if (context.mounted) {
+            Navigator.pop(context); // Remove loading dialog
+            if (chatRoom != null) {
+              Navigator.pushNamed(
+                context, 
+                RouteNames.chat,
+                arguments: chatRoom,
+              );
+            } else {
+              // Fallback if chat data couldn't be retrieved
+              Navigator.pushNamed(context, RouteNames.chatList);
+            }
+          }
+          break;
+        
+        case NotificationType.system:
+          if (context.mounted) {
+            Navigator.pop(context); // Remove loading dialog
+            _showSystemNotificationDetails(context, notification);
+          }
+          break;
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); // Remove loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
+  }
+
+  void _showSystemNotificationDetails(BuildContext context, NotificationModel notification) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
+        title: Text(
+          notification.title,
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              notification.message,
+              style: TextStyle(
+                color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade800,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              notification.time,
+              style: TextStyle(
+                fontSize: 12,
+                color: isDarkMode ? Colors.grey.shade500 : Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Close',
+              style: TextStyle(
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _getNotificationIcon(NotificationModel notification, bool isDarkMode) {

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/notification_model.dart';
 import '../repositories/notification_repository.dart';
+import 'package:flutter_dating_app/features/chat/models/chat_room.dart';
+import 'package:flutter_dating_app/features/matching/models/match_result.dart';
 
 class NotificationProvider extends ChangeNotifier {
   final NotificationRepository _repository;
+  
   
   List<NotificationModel> _notifications = [];
   bool _isLoading = false;
@@ -87,6 +90,28 @@ class NotificationProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       notifyListeners();
+    }
+  }
+
+  // Add methods to get related data
+  
+  Future<MatchResult?> getMatchForNotification(String notificationId) async {
+    try {
+      return await _repository.getMatchForNotification(notificationId);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+  
+  Future<ChatRoom?> getChatRoomForNotification(String notificationId) async {
+    try {
+      return await _repository.getChatRoomForNotification(notificationId);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
     }
   }
 }
