@@ -87,273 +87,423 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode ? AppColors.backgroundDark : Colors.grey.shade50;
+    final cardColor = isDarkMode ? Colors.grey.shade900 : Colors.white;
+    final textColor = isDarkMode ? Colors.white : AppColors.textPrimaryLight;
+    final hintColor = isDarkMode ? Colors.grey.shade500 : Colors.grey.shade600;
     
     return Scaffold(
-      backgroundColor: isDarkMode ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(
           'Edit Profile',
           style: TextStyle(
-            color: isDarkMode ? Colors.white : AppColors.textPrimaryLight,
+            color: textColor,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
+        backgroundColor: cardColor,
         elevation: 0,
         iconTheme: IconThemeData(
           color: isDarkMode ? Colors.white : Colors.grey.shade800,
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Name field
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Name',
-                  labelStyle: TextStyle(
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+              // Profile header with avatar placeholder
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
                     ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: isDarkMode ? Colors.grey.shade900 : Colors.grey.shade50,
+                  ],
                 ),
-                style: TextStyle(
-                  color: isDarkMode ? Colors.white : Colors.black,
+                child: Column(
+                  children: [
+                    // Avatar with edit button
+                    Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+                          child: Icon(
+                            Icons.person,
+                            size: 50,
+                            color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade400,
+                          ),
+                        ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: cardColor,
+                                width: 2,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.edit,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Edit Your Profile',
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                },
               ),
               
               const SizedBox(height: 16),
               
-              // Age slider
-              Text(
-                'Age: $_age',
-                style: TextStyle(
-                  color: isDarkMode ? Colors.white : AppColors.textPrimaryLight,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+              // Form fields in cards
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Basic Info Section
+                    _buildSectionHeader('Basic Information', isDarkMode),
+                    
+                    // Name field
+                    _buildCard(
+                      child: _buildTextField(
+                        controller: _nameController,
+                        labelText: 'Name',
+                        icon: Icons.person_outline,
+                        isDarkMode: isDarkMode,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your name';
+                          }
+                          return null;
+                        },
+                      ),
+                      isDarkMode: isDarkMode,
+                      cardColor: cardColor,
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Age slider in card
+                    _buildCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.cake_outlined,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Age',
+                                style: TextStyle(
+                                  color: hintColor,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Text(
+                                  '$_age years',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          SliderTheme(
+                            data: SliderThemeData(
+                              trackHeight: 4,
+                              activeTrackColor: AppColors.primary,
+                              inactiveTrackColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+                              thumbColor: AppColors.primary,
+                              overlayColor: AppColors.primary.withOpacity(0.2),
+                              valueIndicatorColor: AppColors.primary,
+                              valueIndicatorTextStyle: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            child: Slider(
+                              value: _age.toDouble(),
+                              min: 18,
+                              max: 80,
+                              divisions: 62,
+                              label: _age.toString(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _age = value.round();
+                                });
+                              },
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '18',
+                                style: TextStyle(
+                                  color: hintColor,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(
+                                '80',
+                                style: TextStyle(
+                                  color: hintColor,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      isDarkMode: isDarkMode,
+                      cardColor: cardColor,
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // About Section
+                    _buildSectionHeader('About You', isDarkMode),
+                    
+                    // Bio field
+                    _buildCard(
+                      child: _buildTextField(
+                        controller: _bioController,
+                        labelText: 'Bio',
+                        icon: Icons.edit_note_outlined,
+                        isDarkMode: isDarkMode,
+                        maxLines: 4,
+                        hintText: 'Tell others about yourself...',
+                      ),
+                      isDarkMode: isDarkMode,
+                      cardColor: cardColor,
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Location & Work Section
+                    _buildSectionHeader('Location & Work', isDarkMode),
+                    
+                    // Location field
+                    _buildCard(
+                      child: _buildTextField(
+                        controller: _locationController,
+                        labelText: 'Location',
+                        icon: Icons.location_on_outlined,
+                        isDarkMode: isDarkMode,
+                        hintText: 'City, Country',
+                      ),
+                      isDarkMode: isDarkMode,
+                      cardColor: cardColor,
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Occupation field
+                    _buildCard(
+                      child: _buildTextField(
+                        controller: _occupationController,
+                        labelText: 'Occupation',
+                        icon: Icons.work_outline,
+                        isDarkMode: isDarkMode,
+                      ),
+                      isDarkMode: isDarkMode,
+                      cardColor: cardColor,
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Education field
+                    _buildCard(
+                      child: _buildTextField(
+                        controller: _educationController,
+                        labelText: 'Education',
+                        icon: Icons.school_outlined,
+                        isDarkMode: isDarkMode,
+                      ),
+                      isDarkMode: isDarkMode,
+                      cardColor: cardColor,
+                    ),
+                    
+                    const SizedBox(height: 32),
+                    
+                    // Save button
+                    CustomButton(
+                      text: 'Save Changes',
+                      onPressed: _isLoading ? null : _saveProfile,
+                      isLoading: _isLoading,
+                      type: ButtonType.primary,
+                    ),
+                    
+                    const SizedBox(height: 24),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Text(
-                    '18',
-                    style: TextStyle(
-                      color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-                    ),
-                  ),
-                  Expanded(
-                    child: Slider(
-                      value: _age.toDouble(),
-                      min: 18,
-                      max: 80,
-                      divisions: 62,
-                      activeColor: AppColors.primary,
-                      inactiveColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade300,
-                      label: _age.toString(),
-                      onChanged: (value) {
-                        setState(() {
-                          _age = value.round();
-                        });
-                      },
-                    ),
-                  ),
-                  Text(
-                    '80',
-                    style: TextStyle(
-                      color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Bio field
-              TextFormField(
-                controller: _bioController,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  labelText: 'Bio',
-                  labelStyle: TextStyle(
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: isDarkMode ? Colors.grey.shade900 : Colors.grey.shade50,
-                ),
-                style: TextStyle(
-                  color: isDarkMode ? Colors.white : Colors.black,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Location field
-              TextFormField(
-                controller: _locationController,
-                decoration: InputDecoration(
-                  labelText: 'Location',
-                  labelStyle: TextStyle(
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: isDarkMode ? Colors.grey.shade900 : Colors.grey.shade50,
-                ),
-                style: TextStyle(
-                  color: isDarkMode ? Colors.white : Colors.black,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Occupation field
-              TextFormField(
-                controller: _occupationController,
-                decoration: InputDecoration(
-                  labelText: 'Occupation',
-                  labelStyle: TextStyle(
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: isDarkMode ? Colors.grey.shade900 : Colors.grey.shade50,
-                ),
-                style: TextStyle(
-                  color: isDarkMode ? Colors.white : Colors.black,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Education field
-              TextFormField(
-                controller: _educationController,
-                decoration: InputDecoration(
-                  labelText: 'Education',
-                  labelStyle: TextStyle(
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: isDarkMode ? Colors.grey.shade900 : Colors.grey.shade50,
-                ),
-                style: TextStyle(
-                  color: isDarkMode ? Colors.white : Colors.black,
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Save button
-              CustomButton(
-                text: 'Save Changes',
-                onPressed: _isLoading ? null : _saveProfile,
-                isLoading: _isLoading,
-                type: ButtonType.primary,
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+  
+  Widget _buildSectionHeader(String title, bool isDarkMode) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 12),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: AppColors.primary,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildCard({
+    required Widget child,
+    required bool isDarkMode,
+    required Color cardColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+  
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String labelText,
+    required IconData icon,
+    required bool isDarkMode,
+    String? hintText,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
+    final textColor = isDarkMode ? Colors.white : Colors.black;
+    final hintColor = isDarkMode ? Colors.grey.shade500 : Colors.grey.shade600;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              icon,
+              color: AppColors.primary,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              labelText,
+              style: TextStyle(
+                color: hintColor,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          maxLines: maxLines,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 16,
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: TextStyle(
+              color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade400,
+              fontSize: 16,
+            ),
+            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade300,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade300,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(
+                color: AppColors.primary,
+                width: 1.5,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(
+                color: Colors.red,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 1.5,
+              ),
+            ),
+            filled: true,
+            fillColor: isDarkMode ? Colors.grey.shade800.withOpacity(0.3) : Colors.grey.shade50,
+          ),
+          validator: validator,
+        ),
+      ],
     );
   }
 }
