@@ -33,4 +33,7 @@ class RouteNames {
   static const String matchPreview = '/match-preview';
   static const String chatSearch = '/chat-search';
 
+  // Profile Routes
+  static const String premium = '/premium';
+
 }

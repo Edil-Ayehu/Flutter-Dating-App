@@ -9,6 +9,9 @@ import 'package:flutter_dating_app/features/chat/screens/chat_screen.dart';
 import 'package:flutter_dating_app/features/chat/screens/chat_search_screen.dart';
 import 'package:flutter_dating_app/features/chat/screens/match_preview_screen.dart';
 import 'package:flutter_dating_app/features/matching/models/match_result.dart';
+import 'package:flutter_dating_app/features/profile/screens/edit_profile_screen.dart';
+import 'package:flutter_dating_app/features/profile/screens/premium_screen.dart';
+import 'package:flutter_dating_app/features/profile/screens/settings_screen.dart';
 import 'package:flutter_dating_app/features/splash/screens/splash_screen.dart';
 import 'package:flutter_dating_app/features/matching/screens/discover_screen.dart';
 import 'package:flutter_dating_app/features/profile/screens/profile_screen.dart';
@@ -90,6 +93,16 @@ class AppRouter {
         final MatchResult match = settings.arguments as MatchResult;
         return MaterialPageRoute(
             builder: (_) => MatchPreviewScreen(match: match));
+      case RouteNames.premium:
+        return MaterialPageRoute(builder: (_) => const PremiumScreen());
+      
+            // Add settings route
+      case RouteNames.settings:
+        return MaterialPageRoute(builder: (_) => const SettingsScreen());
+        
+      // Add edit profile route
+      case RouteNames.editProfile:
+        return MaterialPageRoute(builder: (_) => const EditProfileScreen());
 
       default:
         return MaterialPageRoute(
