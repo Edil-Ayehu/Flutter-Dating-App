@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dating_app/features/profile/prodivers/profile_provider.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/color_constants.dart';
+import '../../../core/providers/theme_provider.dart';
 import '../../../routes/route_names.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -159,12 +161,13 @@ class SettingsScreen extends StatelessWidget {
                 _buildSwitchItem(
                   icon: Icons.dark_mode_outlined,
                   title: 'Dark Mode',
-                  value: preferences['darkMode'] ?? false,
+                  value: Provider.of<ThemeProvider>(context).isDarkMode,
                   onChanged: (value) {
+                    Provider.of<ThemeProvider>(context, listen: false).setDarkMode(value);
+                    
                     final newPreferences = Map<String, bool>.from(preferences);
                     newPreferences['darkMode'] = value;
                     provider.updatePreferences(newPreferences);
-                    // Note: This doesn't actually change the theme, just updates the preference
                   },
                   isDarkMode: isDarkMode,
                 ),

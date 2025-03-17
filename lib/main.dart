@@ -10,6 +10,7 @@ import 'package:flutter_dating_app/features/profile/repositories/profile_reposit
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
+import 'core/providers/theme_provider.dart';
 
 void main() async {
   // Ensure Flutter is initialized before accessing platform channels
@@ -54,6 +55,7 @@ void main() async {
             repository: profileRepository,
           ),
         ),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const App(),
     ),
