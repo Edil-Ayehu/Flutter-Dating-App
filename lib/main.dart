@@ -3,6 +3,8 @@ import 'package:flutter_dating_app/features/chat/providers/chat_provider.dart';
 import 'package:flutter_dating_app/features/chat/repositories/chat_repository.dart';
 import 'package:flutter_dating_app/features/matching/providers/matching_provider.dart';
 import 'package:flutter_dating_app/features/matching/repositories/matching_repository.dart';
+import 'package:flutter_dating_app/features/notifications/providers/notification_provider.dart';
+import 'package:flutter_dating_app/features/notifications/repositories/notification_repository.dart';
 import 'package:flutter_dating_app/features/onboarding/providers/onboarding_provider.dart';
 import 'package:flutter_dating_app/features/onboarding/repositories/onboarding_repository.dart';
 import 'package:flutter_dating_app/features/profile/prodivers/profile_provider.dart';
@@ -31,6 +33,7 @@ void main() async {
   final matchingRepository = MatchingRepository();
   final chatRepository = ChatRepository();
   final profileRepository = ProfileRepository();
+  final notificationRepository = NotificationRepository();
   
   runApp(
     MultiProvider(
@@ -53,6 +56,11 @@ void main() async {
          ChangeNotifierProvider(
           create: (_) => ProfileProvider(
             repository: profileRepository,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NotificationProvider(
+            repository: notificationRepository,
           ),
         ),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
