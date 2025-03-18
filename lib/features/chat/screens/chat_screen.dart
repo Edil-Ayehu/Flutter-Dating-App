@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dating_app/features/icebreakers/widgets/icebreaker_suggestion_widget.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/color_constants.dart';
-import '../../../core/constants/text_styles.dart';
 import '../models/chat_message.dart';
 import '../models/chat_room.dart';
 import '../providers/chat_provider.dart';
 import 'package:intl/intl.dart';
+
+
 
 class ChatScreen extends StatefulWidget {
   final ChatRoom chatRoom;
@@ -23,6 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isComposing = false;
+  bool _showIcebreakerSuggestion = false;
 
   @override
   void initState() {
@@ -288,6 +291,21 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
           ),
           
+          // Icebreaker suggestion
+          if (_showIcebreakerSuggestion)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: IcebreakerSuggestionWidget(
+                matchId: widget.chatRoom.matchId,
+                onSendIcebreaker: (question) {
+                  _handleSubmitted(question);
+                  setState(() {
+                    _showIcebreakerSuggestion = false;
+                  });
+                },
+              ),
+            ),
+          
           // Message input
           Container(
             decoration: BoxDecoration(
@@ -300,9 +318,21 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ],
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             child: Row(
               children: [
+                // Icebreaker button
+                IconButton(
+                  icon: const Icon(Icons.lightbulb_outline),
+                  onPressed: () {
+                    setState(() {
+                      _showIcebreakerSuggestion = !_showIcebreakerSuggestion;
+                    });
+                  },
+                  color: _showIcebreakerSuggestion 
+                      ? AppColors.primary 
+                      : (isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700),
+                ),
                 IconButton(
                   icon: Icon(
                     Icons.photo_camera,

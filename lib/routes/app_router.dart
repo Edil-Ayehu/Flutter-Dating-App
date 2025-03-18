@@ -8,6 +8,9 @@ import 'package:flutter_dating_app/features/chat/screens/chat_list_screens.dart'
 import 'package:flutter_dating_app/features/chat/screens/chat_screen.dart';
 import 'package:flutter_dating_app/features/chat/screens/chat_search_screen.dart';
 import 'package:flutter_dating_app/features/chat/screens/match_preview_screen.dart';
+import 'package:flutter_dating_app/features/icebreakers/models/icebreaker.dart';
+import 'package:flutter_dating_app/features/icebreakers/screens/icebreaker_detail_screen.dart';
+import 'package:flutter_dating_app/features/icebreakers/screens/icebreaker_list_screen.dart';
 import 'package:flutter_dating_app/features/matching/models/match_result.dart';
 import 'package:flutter_dating_app/features/profile/screens/edit_profile_screen.dart';
 import 'package:flutter_dating_app/features/profile/screens/premium_screen.dart';
@@ -103,6 +106,18 @@ class AppRouter {
       // Add edit profile route
       case RouteNames.editProfile:
         return MaterialPageRoute(builder: (_) => const EditProfileScreen());
+
+            // Icebreaker Routes
+      case RouteNames.icebreakers:
+        return MaterialPageRoute(
+          builder: (_) => const IcebreakerListScreen(),
+        );
+      
+      case RouteNames.icebreakerDetail:
+        final icebreaker = settings.arguments as Icebreaker;
+        return MaterialPageRoute(
+          builder: (_) => IcebreakerDetailScreen(icebreaker: icebreaker),
+        );
 
       default:
         return MaterialPageRoute(

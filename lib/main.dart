@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dating_app/features/chat/providers/chat_provider.dart';
 import 'package:flutter_dating_app/features/chat/repositories/chat_repository.dart';
+import 'package:flutter_dating_app/features/icebreakers/providers/icebreaker_provider.dart';
+import 'package:flutter_dating_app/features/icebreakers/repositories/icebreaker_repository.dart';
 import 'package:flutter_dating_app/features/matching/providers/matching_provider.dart';
 import 'package:flutter_dating_app/features/matching/repositories/matching_repository.dart';
 import 'package:flutter_dating_app/features/notifications/providers/notification_provider.dart';
@@ -34,6 +36,7 @@ void main() async {
   final chatRepository = ChatRepository();
   final profileRepository = ProfileRepository();
   final notificationRepository = NotificationRepository();
+  final icebreakerRepository = IcebreakerRepository();
   
   runApp(
     MultiProvider(
@@ -61,6 +64,11 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => NotificationProvider(
             repository: notificationRepository,
+          ),
+        ),
+                ChangeNotifierProvider(
+          create: (_) => IcebreakerProvider(
+            repository: icebreakerRepository,
           ),
         ),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),

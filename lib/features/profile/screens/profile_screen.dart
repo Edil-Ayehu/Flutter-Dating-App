@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/color_constants.dart';
 import '../../../core/constants/text_styles.dart';
 import '../../../shared/layouts/main_layout.dart';
 import '../../../routes/route_names.dart';
+import '../../../features/icebreakers/providers/icebreaker_provider.dart';
+import '../../../features/icebreakers/widgets/icebreaker_card.dart';
+
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -258,6 +262,74 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(height: 50),
                   ],
                 ),
+              ),
+            ),
+            
+            // Icebreakers section
+            SliverToBoxAdapter(
+              child: Consumer<IcebreakerProvider>(
+                builder: (context, icebreakerProvider, child) {
+                  final answeredIcebreakers = icebreakerProvider.getAnsweredIcebreakers();
+                  
+                  if (answeredIcebreakers.isEmpty) {
+                    return Container(); // Don't show section if no icebreakers answered
+                  }
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Icebreakers',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.white : Colors.black,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, RouteNames.icebreakers);
+                              },
+                              child: const Text('See All'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 200,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: answeredIcebreakers.length > 3 ? 3 : answeredIcebreakers.length,
+                          itemBuilder: (context, index) {
+                            final icebreaker = answeredIcebreakers[index];
+                            final answers = icebreakerProvider.userAnswers[icebreaker.id] ?? [];
+                            
+                            return Container(
+                              width: 250,
+                              margin: const EdgeInsets.only(right: 16),
+                              child: IcebreakerCard(
+                                icebreaker: icebreaker,
+                                answer: answers.isNotEmpty ? answers.first.answer : null,
+                                isCompact: true,
+                                onTap: () => Navigator.pushNamed(
+                                  context,
+                                  RouteNames.icebreakerDetail,
+                                  arguments: icebreaker,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],

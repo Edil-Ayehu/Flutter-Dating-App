@@ -36,4 +36,8 @@ class RouteNames {
   // Profile Routes
   static const String premium = '/premium';
 
+    // Icebreaker Routes
+  static const String icebreakers = '/icebreakers';
+  static const String icebreakerDetail = '/icebreaker-detail';
+
 }
