@@ -5,8 +5,16 @@ import '../../../core/constants/color_constants.dart';
 import '../../../core/providers/theme_provider.dart';
 import '../../../routes/route_names.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  // Track loading state for individual settings
+  final Map<String, bool> _loadingStates = {};
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +45,7 @@ class SettingsScreen extends StatelessWidget {
           color: isDarkMode ? Colors.white : Colors.grey.shade800,
         ),
       ),
-      body: provider.isLoading
+      body: provider.isLoading && _loadingStates.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -107,27 +115,27 @@ class SettingsScreen extends StatelessWidget {
                   cardColor: cardColor,
                   children: [
                     _buildSwitchItem(
+                      key: 'showLocation',
                       icon: Icons.location_on_outlined,
                       title: 'Show Location',
                       subtitle: 'Allow others to see your location',
                       value: preferences['showLocation'] ?? true,
-                      onChanged: (value) {
-                        final newPreferences = Map<String, bool>.from(preferences);
-                        newPreferences['showLocation'] = value;
-                        provider.updatePreferences(newPreferences);
+                      isLoading: _loadingStates['showLocation'] ?? false,
+                      onChanged: (value) async {
+                        await _updatePreference(provider, preferences, 'showLocation', value);
                       },
                       isDarkMode: isDarkMode,
                     ),
                     _buildDivider(isDarkMode),
                     _buildSwitchItem(
+                      key: 'showAge',
                       icon: Icons.calendar_today_outlined,
                       title: 'Show Age',
                       subtitle: 'Display your age on your profile',
                       value: preferences['showAge'] ?? true,
-                      onChanged: (value) {
-                        final newPreferences = Map<String, bool>.from(preferences);
-                        newPreferences['showAge'] = value;
-                        provider.updatePreferences(newPreferences);
+                      isLoading: _loadingStates['showAge'] ?? false,
+                      onChanged: (value) async {
+                        await _updatePreference(provider, preferences, 'showAge', value);
                       },
                       isDarkMode: isDarkMode,
                     ),
@@ -145,40 +153,40 @@ class SettingsScreen extends StatelessWidget {
                   cardColor: cardColor,
                   children: [
                     _buildSwitchItem(
+                      key: 'notifications',
                       icon: Icons.notifications_outlined,
                       title: 'Push Notifications',
                       subtitle: 'Receive notifications on your device',
                       value: preferences['notifications'] ?? true,
-                      onChanged: (value) {
-                        final newPreferences = Map<String, bool>.from(preferences);
-                        newPreferences['notifications'] = value;
-                        provider.updatePreferences(newPreferences);
+                      isLoading: _loadingStates['notifications'] ?? false,
+                      onChanged: (value) async {
+                        await _updatePreference(provider, preferences, 'notifications', value);
                       },
                       isDarkMode: isDarkMode,
                     ),
                     _buildDivider(isDarkMode),
                     _buildSwitchItem(
+                      key: 'matchAlerts',
                       icon: Icons.favorite_border,
                       title: 'Match Alerts',
                       subtitle: 'Get notified when you match with someone',
                       value: preferences['matchAlerts'] ?? true,
-                      onChanged: (value) {
-                        final newPreferences = Map<String, bool>.from(preferences);
-                        newPreferences['matchAlerts'] = value;
-                        provider.updatePreferences(newPreferences);
+                      isLoading: _loadingStates['matchAlerts'] ?? false,
+                      onChanged: (value) async {
+                        await _updatePreference(provider, preferences, 'matchAlerts', value);
                       },
                       isDarkMode: isDarkMode,
                     ),
                     _buildDivider(isDarkMode),
                     _buildSwitchItem(
+                      key: 'messageAlerts',
                       icon: Icons.message_outlined,
                       title: 'Message Notifications',
                       subtitle: 'Get notified when you receive messages',
                       value: preferences['messageAlerts'] ?? true,
-                      onChanged: (value) {
-                        final newPreferences = Map<String, bool>.from(preferences);
-                        newPreferences['messageAlerts'] = value;
-                        provider.updatePreferences(newPreferences);
+                      isLoading: _loadingStates['messageAlerts'] ?? false,
+                      onChanged: (value) async {
+                        await _updatePreference(provider, preferences, 'messageAlerts', value);
                       },
                       isDarkMode: isDarkMode,
                     ),
@@ -196,16 +204,16 @@ class SettingsScreen extends StatelessWidget {
                   cardColor: cardColor,
                   children: [
                     _buildSwitchItem(
+                      key: 'darkMode',
                       icon: Icons.dark_mode_outlined,
                       title: 'Dark Mode',
                       subtitle: 'Toggle between light and dark theme',
                       value: Provider.of<ThemeProvider>(context).isDarkMode,
-                      onChanged: (value) {
+                      isLoading: _loadingStates['darkMode'] ?? false,
+                      onChanged: (value) async {
                         Provider.of<ThemeProvider>(context, listen: false).setDarkMode(value);
                         
-                        final newPreferences = Map<String, bool>.from(preferences);
-                        newPreferences['darkMode'] = value;
-                        provider.updatePreferences(newPreferences);
+                        await _updatePreference(provider, preferences, 'darkMode', value);
                       },
                       isDarkMode: isDarkMode,
                     ),
@@ -484,12 +492,14 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget _buildSwitchItem({
+    required String key,
     required IconData icon,
     required String title,
     required String subtitle,
     required bool value,
     required Function(bool) onChanged,
     required bool isDarkMode,
+    required bool isLoading,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
@@ -534,7 +544,15 @@ class SettingsScreen extends StatelessWidget {
           ),
           Switch(
             value: value,
-            onChanged: onChanged,
+            onChanged: (value) async {
+              setState(() {
+                _loadingStates[key] = true;
+              });
+              await onChanged(value);
+              setState(() {
+                _loadingStates[key] = false;
+              });
+            },
             activeColor: AppColors.primary,
             activeTrackColor: AppColors.primary.withOpacity(0.3),
             inactiveThumbColor: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade300,
@@ -552,5 +570,23 @@ class SettingsScreen extends StatelessWidget {
       thickness: 0.5,
       indent: 56,
     );
+  }
+
+  Future<void> _updatePreference(ProfileProvider provider, Map<String, dynamic> preferences, String key, bool value) async {
+    // Create a new Map<String, bool> with only boolean values
+    final Map<String, bool> boolPreferences = {};
+    
+    // Copy existing boolean preferences
+    preferences.forEach((k, v) {
+      if (v is bool) {
+        boolPreferences[k] = v;
+      }
+    });
+    
+    // Add or update the new preference
+    boolPreferences[key] = value;
+    
+    // Update preferences
+    await provider.updatePreferences(boolPreferences);
   }
 }
