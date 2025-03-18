@@ -30,13 +30,15 @@ class _IcebreakerListScreenState extends State<IcebreakerListScreen> with Single
   
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
     
     return Scaffold(
       appBar: AppBar(
         title: const Text('Icebreakers'),
-        backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
-        elevation: 0,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
+        elevation: theme.appBarTheme.elevation,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -45,7 +47,11 @@ class _IcebreakerListScreenState extends State<IcebreakerListScreen> with Single
       body: Consumer<IcebreakerProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: CircularProgressIndicator(
+                color: theme.colorScheme.primary,
+              ),
+            );
           }
           
           if (provider.error != null) {
@@ -55,10 +61,7 @@ class _IcebreakerListScreenState extends State<IcebreakerListScreen> with Single
                 children: [
                   Text(
                     'Error loading icebreakers',
-                    style: TextStyle(
-                      color: isDarkMode ? Colors.white : Colors.black,
-                      fontSize: 16,
-                    ),
+                    style: theme.textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton(
@@ -79,9 +82,11 @@ class _IcebreakerListScreenState extends State<IcebreakerListScreen> with Single
             children: [
               TabBar(
                 controller: _tabController,
-                labelColor: AppColors.primary,
-                unselectedLabelColor: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-                indicatorColor: AppColors.primary,
+                labelColor: theme.tabBarTheme.labelColor,
+                unselectedLabelColor: theme.tabBarTheme.unselectedLabelColor,
+                indicatorColor: theme.tabBarTheme.indicatorColor,
+                labelStyle: theme.tabBarTheme.labelStyle,
+                unselectedLabelStyle: theme.tabBarTheme.unselectedLabelStyle,
                 tabs: const [
                   Tab(text: 'To Answer'),
                   Tab(text: 'Answered'),
@@ -96,10 +101,7 @@ class _IcebreakerListScreenState extends State<IcebreakerListScreen> with Single
                         ? Center(
                             child: Text(
                               'No icebreakers to answer',
-                              style: TextStyle(
-                                color: isDarkMode ? Colors.white : Colors.black,
-                                fontSize: 16,
-                              ),
+                              style: theme.textTheme.bodyLarge,
                             ),
                           )
                         : ListView.builder(
@@ -119,10 +121,7 @@ class _IcebreakerListScreenState extends State<IcebreakerListScreen> with Single
                         ? Center(
                             child: Text(
                               'You haven\'t answered any icebreakers yet',
-                              style: TextStyle(
-                                color: isDarkMode ? Colors.white : Colors.black,
-                                fontSize: 16,
-                              ),
+                              style: theme.textTheme.bodyLarge,
                             ),
                           )
                         : ListView.builder(

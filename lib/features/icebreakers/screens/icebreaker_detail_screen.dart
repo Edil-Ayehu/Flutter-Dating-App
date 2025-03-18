@@ -47,13 +47,14 @@ class _IcebreakerDetailScreenState extends State<IcebreakerDetailScreen> {
   
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
     
     return Scaffold(
       appBar: AppBar(
         title: const Text('Icebreaker'),
-        backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
-        elevation: 0,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
+        elevation: theme.appBarTheme.elevation,
       ),
       body: Consumer<IcebreakerProvider>(
         builder: (context, provider, child) {
@@ -100,7 +101,7 @@ class _IcebreakerDetailScreenState extends State<IcebreakerDetailScreen> {
                                 widget.icebreaker.difficulty,
                                 (index) => const Icon(
                                   Icons.star,
-                                  color: Colors.white,
+                                  color: Colors.amber,
                                   size: 16,
                                 ),
                               ),
@@ -144,24 +145,23 @@ class _IcebreakerDetailScreenState extends State<IcebreakerDetailScreen> {
                 // Answer section
                 Text(
                   hasAnswered ? 'Your Answer' : 'Your Answer',
-                  style: TextStyle(
-                    color: isDarkMode ? Colors.white : Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: theme.textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
+                
+                // Answer text field
                 TextField(
                   controller: _answerController,
                   maxLines: 5,
                   decoration: InputDecoration(
                     hintText: 'Type your answer here...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                     filled: true,
-                    fillColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+                    fillColor: theme.inputDecorationTheme.fillColor,
+                    border: theme.inputDecorationTheme.border,
+                    enabledBorder: theme.inputDecorationTheme.enabledBorder,
+                    focusedBorder: theme.inputDecorationTheme.focusedBorder,
                   ),
+                  style: theme.textTheme.bodyLarge,
                 ),
                 
                 const SizedBox(height: 16),
@@ -176,15 +176,12 @@ class _IcebreakerDetailScreenState extends State<IcebreakerDetailScreen> {
                           _isPublic = value;
                         });
                       },
-                      activeColor: AppColors.primary,
+                      activeColor: theme.colorScheme.primary,
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      _isPublic ? 'Public - Visible on your profile' : 'Private - Only visible in chats',
-                      style: TextStyle(
-                        color: isDarkMode ? Colors.white : Colors.black,
-                        fontSize: 14,
-                      ),
+                      'Make answer visible to matches',
+                      style: theme.textTheme.bodyMedium,
                     ),
                   ],
                 ),
@@ -198,28 +195,18 @@ class _IcebreakerDetailScreenState extends State<IcebreakerDetailScreen> {
                     onPressed: _isSubmitting
                         ? null
                         : () => _submitAnswer(context, provider),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
+                    style: theme.elevatedButtonTheme.style,
                     child: _isSubmitting
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                              color: Colors.white,
+                              color: theme.colorScheme.onPrimary,
                               strokeWidth: 2,
                             ),
                           )
                         : Text(
-                                                        hasAnswered ? 'Update Answer' : 'Save Answer',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            hasAnswered ? 'Update Answer' : 'Save Answer',
                           ),
                   ),
                 ),
