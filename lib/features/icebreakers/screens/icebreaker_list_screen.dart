@@ -91,63 +91,71 @@ class _IcebreakerListScreenState extends State<IcebreakerListScreen> with Single
                   color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: TabBar(
-                  controller: _tabController,
-                  indicator: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    color: theme.colorScheme.primary,
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.colorScheme.primary.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                child: Material(
+                  color: Colors.transparent,
+                  elevation: 0,
+                  child: TabBar(
+                    controller: _tabController,
+                    indicator: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      color: theme.colorScheme.primary,
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.colorScheme.primary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    indicatorSize: TabBarIndicatorSize.label,
+                    indicatorWeight: 0,
+                    indicatorPadding: EdgeInsets.zero,
+                    dividerColor: Colors.transparent,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: isDarkMode ? Colors.white70 : Colors.black54,
+                    labelStyle: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                    tabs: [
+                      Tab(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.question_answer_outlined,
+                              size: 16,
+                              color: _tabController.index == 0 
+                                  ? Colors.white 
+                                  : (isDarkMode ? Colors.white70 : Colors.black54),
+                            ),
+                            const SizedBox(width: 6),
+                            const Text('To Answer'),
+                          ],
+                        ),
+                      ),
+                      Tab(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.check_circle_outline,
+                              size: 16,
+                              color: _tabController.index == 1 
+                                  ? Colors.white 
+                                  : (isDarkMode ? Colors.white70 : Colors.black54),
+                            ),
+                            const SizedBox(width: 6),
+                            const Text('Answered'),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                  labelColor: Colors.white,
-                  unselectedLabelColor: isDarkMode ? Colors.white70 : Colors.black54,
-                  labelStyle: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                  unselectedLabelStyle: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                  ),
-                  tabs: [
-                    Tab(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.question_answer_outlined,
-                            size: 16,
-                            color: _tabController.index == 0 
-                                ? Colors.white 
-                                : (isDarkMode ? Colors.white70 : Colors.black54),
-                          ),
-                          const SizedBox(width: 6),
-                          const Text('To Answer'),
-                        ],
-                      ),
-                    ),
-                    Tab(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.check_circle_outline,
-                            size: 16,
-                            color: _tabController.index == 1 
-                                ? Colors.white 
-                                : (isDarkMode ? Colors.white70 : Colors.black54),
-                          ),
-                          const SizedBox(width: 6),
-                          const Text('Answered'),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
               ),
               
