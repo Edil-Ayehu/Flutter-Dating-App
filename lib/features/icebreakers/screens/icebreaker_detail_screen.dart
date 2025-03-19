@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/constants/color_constants.dart';
 import '../models/icebreaker.dart';
 import '../providers/icebreaker_provider.dart';
+import 'dart:ui';
+
 
 class IcebreakerDetailScreen extends StatefulWidget {
   final Icebreaker icebreaker;
@@ -48,6 +49,7 @@ class _IcebreakerDetailScreenState extends State<IcebreakerDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
     
     return Scaffold(
       appBar: AppBar(
@@ -66,148 +68,282 @@ class _IcebreakerDetailScreenState extends State<IcebreakerDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Question card
-                Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                // Question card with solid color
+                Container(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
-                  color: AppColors.primary,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                widget.icebreaker.category,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Category and difficulty
+                          Row(
+                            children: [
+                              // Category pill
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.onPrimary.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: theme.colorScheme.onPrimary.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  widget.icebreaker.category.toUpperCase(),
+                                  style: TextStyle(
+                                    color: theme.colorScheme.onPrimary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
                               ),
+                              const Spacer(),
+                              // Difficulty stars
+                              Row(
+                                children: List.generate(
+                                  5, // Total possible stars
+                                  (index) => Padding(
+                                    padding: const EdgeInsets.only(left: 2),
+                                    child: Icon(
+                                      index < widget.icebreaker.difficulty
+                                          ? Icons.star_rounded
+                                          : Icons.star_border_rounded,
+                                      color: index < widget.icebreaker.difficulty
+                                          ? Colors.amber
+                                          : theme.colorScheme.onPrimary.withOpacity(0.3),
+                                      size: 18,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          
+                          // Question text
+                          Text(
+                            widget.icebreaker.question,
+                            style: TextStyle(
+                              color: theme.colorScheme.onPrimary,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              height: 1.4,
                             ),
-                            const Spacer(),
-                            Row(
-                              children: List.generate(
-                                widget.icebreaker.difficulty,
-                                (index) => const Icon(
-                                  Icons.star,
-                                  color: Colors.amber,
-                                  size: 16,
+                          ),
+                          const SizedBox(height: 20),
+                          
+                          // Tags
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: widget.icebreaker.tags.map((tag) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.onPrimary.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                              ),
+                                child: Text(
+                                  '#$tag',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: theme.colorScheme.onPrimary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // Answer section with subtle animation
+                AnimatedOpacity(
+                  opacity: 1.0,
+                  duration: const Duration(milliseconds: 500),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.edit_note_rounded,
+                            color: theme.colorScheme.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Your Answer',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Answer text field with enhanced styling
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isDarkMode 
+                                  ? Colors.black.withOpacity(0.1)
+                                  : Colors.grey.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          widget.icebreaker.question,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                        child: TextField(
+                          controller: _answerController,
+                          maxLines: 5,
+                          decoration: InputDecoration(
+                            hintText: 'Type your answer here...',
+                            filled: true,
+                            fillColor: isDarkMode 
+                                ? Colors.grey.shade900 
+                                : Colors.grey.shade50,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                color: isDarkMode 
+                                    ? Colors.grey.shade800 
+                                    : Colors.grey.shade200,
+                                width: 1,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                color: theme.colorScheme.primary,
+                                width: 1.5,
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.all(20),
+                          ),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            height: 1.5,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          children: widget.icebreaker.tags.map((tag) {
-                            return Chip(
-                              label: Text(
-                                '#$tag',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white,
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Privacy toggle with improved styling
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isDarkMode 
+                              ? Colors.grey.shade800.withOpacity(0.5) 
+                              : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              _isPublic ? Icons.visibility : Icons.visibility_off,
+                              color: _isPublic 
+                                  ? theme.colorScheme.primary 
+                                  : theme.colorScheme.onBackground.withOpacity(0.5),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Make answer visible to matches',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              backgroundColor: Colors.white.withOpacity(0.2),
-                              padding: EdgeInsets.zero,
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Answer section
-                Text(
-                  hasAnswered ? 'Your Answer' : 'Your Answer',
-                  style: theme.textTheme.titleLarge,
-                ),
-                const SizedBox(height: 12),
-                
-                // Answer text field
-                TextField(
-                  controller: _answerController,
-                  maxLines: 5,
-                  decoration: InputDecoration(
-                    hintText: 'Type your answer here...',
-                    filled: true,
-                    fillColor: theme.inputDecorationTheme.fillColor,
-                    border: theme.inputDecorationTheme.border,
-                    enabledBorder: theme.inputDecorationTheme.enabledBorder,
-                    focusedBorder: theme.inputDecorationTheme.focusedBorder,
-                  ),
-                  style: theme.textTheme.bodyLarge,
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Privacy toggle
-                Row(
-                  children: [
-                    Switch(
-                      value: _isPublic,
-                      onChanged: (value) {
-                        setState(() {
-                          _isPublic = value;
-                        });
-                      },
-                      activeColor: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Make answer visible to matches',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Submit button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : () => _submitAnswer(context, provider),
-                    style: theme.elevatedButtonTheme.style,
-                    child: _isSubmitting
-                        ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: theme.colorScheme.onPrimary,
-                              strokeWidth: 2,
                             ),
-                          )
-                        : Text(
-                            hasAnswered ? 'Update Answer' : 'Save Answer',
+                            Switch(
+                              value: _isPublic,
+                              onChanged: (value) {
+                                setState(() {
+                                  _isPublic = value;
+                                });
+                              },
+                              activeColor: theme.colorScheme.primary,
+                              activeTrackColor: theme.colorScheme.primary.withOpacity(0.3),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      // Submit button with animation
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: _isSubmitting
+                              ? null
+                              : () => _submitAnswer(context, provider),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: theme.colorScheme.onPrimary,
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
+                          child: _isSubmitting
+                              ? SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: theme.colorScheme.onPrimary,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      hasAnswered ? Icons.update : Icons.check_circle,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      hasAnswered ? 'Update Answer' : 'Save Answer',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
