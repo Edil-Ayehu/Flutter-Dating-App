@@ -749,9 +749,42 @@ class _ChatScreenState extends State<ChatScreen> {
     
     return GestureDetector(
       onTap: () {
-        // Toggle play/pause
-        setState(() {
-          controller.value.isPlaying ? controller.pause() : controller.play();
+        // Navigate to full screen video player
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => Scaffold(
+              backgroundColor: Colors.black,
+              appBar: AppBar(
+                backgroundColor: Colors.black,
+                iconTheme: const IconThemeData(color: Colors.white),
+                elevation: 0,
+              ),
+              body: Center(
+                child: AspectRatio(
+                  aspectRatio: controller.value.aspectRatio,
+                  child: VideoPlayer(controller),
+                ),
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  setState(() {
+                    controller.value.isPlaying
+                        ? controller.pause()
+                        : controller.play();
+                  });
+                },
+                backgroundColor: AppColors.primary,
+                child: Icon(
+                  controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                ),
+              ),
+            ),
+          ),
+        ).then((_) {
+          // Pause the video when returning from full screen
+          if (controller.value.isPlaying) {
+            controller.pause();
+          }
         });
       },
       child: Stack(
@@ -775,7 +808,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
             ),
           ),
-          if (controller.value.isInitialized && !controller.value.isPlaying)
+          if (controller.value.isInitialized)
             Container(
               width: 50,
               height: 50,
