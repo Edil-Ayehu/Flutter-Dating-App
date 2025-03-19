@@ -31,6 +31,8 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isComposing = false;
   bool _showIcebreakerSuggestion = false;
   Map<String, VideoPlayerController> _videoControllers = {};
+  ChatMessage? _replyToMessage;
+  bool _isReplying = false;
 
   @override
   void initState() {
@@ -568,10 +570,10 @@ class _ChatScreenState extends State<ChatScreen> {
                                     ),
                                   ),
                                 ),
-                              _buildMessageBubble(
-                                message: message,
-                                isMe: isMe,
-                                isDarkMode: isDarkMode,
+                              _buildMessageItem(
+                                message,
+                                isMe,
+                                isDarkMode,
                               ),
                             ],
                           );
@@ -594,6 +596,9 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           
+          // Reply preview
+          _buildReplyPreview(),
+          
           // Message input
           _buildMessageInput(),
         ],
@@ -601,96 +606,130 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildMessageBubble({
-    required ChatMessage message,
-    required bool isMe,
-    required bool isDarkMode,
-  }) {
+  Widget _buildMessageItem(ChatMessage message, bool isMe, bool isDarkMode) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       child: Row(
         mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (!isMe) ...[
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: NetworkImage(widget.chatRoom.matchImage),
-            ),
-            const SizedBox(width: 8),
-          ],
+          if (!isMe) _buildAvatar(isDarkMode),
+          const SizedBox(width: 8),
           Flexible(
-            child: Container(
-              padding: message.messageType == MessageType.text
-                  ? const EdgeInsets.symmetric(horizontal: 16, vertical: 10)
-                  : const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              decoration: BoxDecoration(
-                color: isMe
-                    ? AppColors.primary
-                    : (isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200),
-                borderRadius: BorderRadius.circular(18).copyWith(
-                  bottomRight: isMe ? const Radius.circular(0) : null,
-                  bottomLeft: !isMe ? const Radius.circular(0) : null,
-                ),
-              ),
+            child: GestureDetector(
+              onLongPress: () {
+                _showReplyUI(message);
+              },
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
-                  // Media content
-                  if (message.messageType == MessageType.image)
+                  // Show reply content if this is a reply message
+                  if (message.replyToId != null)
+                    _buildReplyContent(message, isMe, isDarkMode),
+                  
+                  // Show the actual message content based on type
+                  if (message.messageType == MessageType.text)
+                    _buildTextMessage(message, isMe, isDarkMode)
+                  else if (message.messageType == MessageType.image)
                     _buildImageMessage(message, isMe, isDarkMode)
                   else if (message.messageType == MessageType.video)
-                    _buildVideoMessage(message, isMe, isDarkMode)
-                  else
-                    Text(
-                      message.content,
+                    _buildVideoMessage(message, isMe, isDarkMode),
+                  
+                  // Show timestamp
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      DateFormat('h:mm a').format(message.timestamp),
                       style: TextStyle(
-                        color: isMe
-                            ? Colors.white
-                            : (isDarkMode ? Colors.white : Colors.black),
-                        fontSize: 16,
+                        fontSize: 10,
+                        color: isDarkMode ? Colors.grey.shade500 : Colors.grey.shade600,
                       ),
-                    ),
-                  
-                  // Caption for media messages
-                  if ((message.messageType == MessageType.image || 
-                       message.messageType == MessageType.video) && 
-                       message.content.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        message.content,
-                        style: TextStyle(
-                          color: isMe
-                              ? Colors.white.withOpacity(0.9)
-                              : (isDarkMode ? Colors.white.withOpacity(0.9) : Colors.black.withOpacity(0.9)),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  
-                  const SizedBox(height: 4),
-                  Text(
-                    DateFormat('h:mm a').format(message.timestamp),
-                    style: TextStyle(
-                      color: isMe
-                          ? Colors.white.withOpacity(0.7)
-                          : (isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600),
-                      fontSize: 10,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          if (isMe) ...[
-            const SizedBox(width: 4),
-            Icon(
-              message.isRead ? Icons.done_all : Icons.done,
-              size: 16,
-              color: message.isRead ? Colors.blue : Colors.grey,
+          if (isMe) const SizedBox(width: 8),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAvatar(bool isDarkMode) {
+    return CircleAvatar(
+      radius: 16,
+      backgroundImage: NetworkImage(widget.chatRoom.matchImage),
+    );
+  }
+
+  Widget _buildTextMessage(ChatMessage message, bool isMe, bool isDarkMode) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: isMe
+            ? AppColors.primary
+            : (isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(18).copyWith(
+          bottomRight: isMe ? const Radius.circular(0) : null,
+          bottomLeft: !isMe ? const Radius.circular(0) : null,
+        ),
+      ),
+      child: Text(
+        message.content,
+        style: TextStyle(
+          color: isMe
+              ? Colors.white
+              : (isDarkMode ? Colors.white : Colors.black),
+          fontSize: 16,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReplyContent(ChatMessage message, bool isMe, bool isDarkMode) {
+    if (message.replyToId == null) return const SizedBox.shrink();
+    
+    final isReplyToMe = message.replyToSenderId == Provider.of<ChatProvider>(context, listen: false).currentUserId;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDarkMode 
+            ? Colors.grey.shade800.withOpacity(0.5) 
+            : Colors.grey.shade200.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(8),
+        border: Border(
+          left: BorderSide(
+            color: AppColors.primary,
+            width: 2,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isReplyToMe ? 'You' : widget.chatRoom.matchName,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: isReplyToMe 
+                  ? AppColors.primary 
+                  : (isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700),
             ),
-          ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            message.replyToContent ?? '',
+            style: TextStyle(
+              fontSize: 12,
+              color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
@@ -881,7 +920,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 color: Colors.white,
               ),
               onPressed: _isComposing
-                  ? () => _handleSubmitted(_messageController.text)
+                  ? () => _sendMessage()
                   : null,
             ),
           ),
@@ -993,19 +1032,40 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _handleSubmitted(String text) {
-    if (text.isEmpty) return;
+  void _sendMessage() {
+    if (_messageController.text.trim().isEmpty) return;
     
+    final content = _messageController.text.trim();
     _messageController.clear();
     setState(() {
       _isComposing = false;
     });
     
-    // Send message
-    Provider.of<ChatProvider>(context, listen: false).sendMessage(
-      widget.chatRoom.id,
-      text,
-    );
+    if (_isReplying && _replyToMessage != null) {
+      // Send as a reply
+      Provider.of<ChatProvider>(context, listen: false).sendReplyMessage(
+        widget.chatRoom.id,
+        content,
+        _replyToMessage!,
+      );
+      
+      // Reset reply state
+      setState(() {
+        _replyToMessage = null;
+        _isReplying = false;
+      });
+    } else {
+      // Send as a normal message
+      Provider.of<ChatProvider>(context, listen: false).sendMessage(
+        widget.chatRoom.id,
+        content,
+      );
+    }
+    
+    // Scroll to bottom after sending
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
   }
 
   bool _isSameDay(DateTime date1, DateTime date2) {
@@ -1027,6 +1087,126 @@ class _ChatScreenState extends State<ChatScreen> {
     } else {
       return DateFormat('MMM d, yyyy').format(date);
     }
+  }
+
+  void _showReplyUI(ChatMessage message) {
+    setState(() {
+      _replyToMessage = message;
+      _isReplying = true;
+    });
+    // Focus the text field
+    FocusScope.of(context).requestFocus(FocusNode());
+    FocusScope.of(context).requestFocus();
+  }
+
+  void _cancelReply() {
+    setState(() {
+      _replyToMessage = null;
+      _isReplying = false;
+    });
+  }
+
+  Widget _buildReplyPreview() {
+    if (!_isReplying || _replyToMessage == null) {
+      return const SizedBox.shrink();
+    }
+    
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isMyMessage = _replyToMessage!.senderId == Provider.of<ChatProvider>(context, listen: false).currentUserId;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+        border: Border(
+          left: BorderSide(
+            color: AppColors.primary,
+            width: 4,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  isMyMessage ? 'You' : widget.chatRoom.matchName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isMyMessage ? AppColors.primary : Colors.grey.shade700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                if (_replyToMessage!.messageType == MessageType.text)
+                  Text(
+                    _replyToMessage!.content,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+                    ),
+                  )
+                else if (_replyToMessage!.messageType == MessageType.image)
+                  Row(
+                    children: [
+                      Icon(Icons.image, size: 16, color: Colors.grey.shade600),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Photo',
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  )
+                else if (_replyToMessage!.messageType == MessageType.video)
+                  Row(
+                    children: [
+                      Icon(Icons.videocam, size: 16, color: Colors.grey.shade600),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Video',
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: _cancelReply,
+            color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+            iconSize: 20,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleSubmitted(String text) {
+    if (text.trim().isEmpty) return;
+    
+    _messageController.clear();
+    setState(() {
+      _isComposing = false;
+    });
+    
+    // Send the message
+    Provider.of<ChatProvider>(context, listen: false).sendMessage(
+      widget.chatRoom.id,
+      text,
+    );
+    
+    // Scroll to bottom after sending
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
   }
 }
 

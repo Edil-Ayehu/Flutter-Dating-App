@@ -9,6 +9,9 @@ class ChatMessage {
   final bool isRead;
   final String? mediaUrl;
   final MessageType messageType;
+    final String? replyToId;      // ID of the message being replied to
+  final String? replyToContent; // Content of the message being replied to
+  final String? replyToSenderId; // Sender ID of the message being replied to
 
   ChatMessage({
     required this.id,
@@ -19,6 +22,9 @@ class ChatMessage {
     this.isRead = false,
     this.mediaUrl,
     this.messageType = MessageType.text,
+        this.replyToId,
+    this.replyToContent,
+    this.replyToSenderId,
   });
 
   ChatMessage copyWith({
@@ -30,6 +36,9 @@ class ChatMessage {
     bool? isRead,
     String? mediaUrl,
     MessageType? messageType,
+        String? replyToId,
+    String? replyToContent,
+    String? replyToSenderId,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -40,6 +49,9 @@ class ChatMessage {
       isRead: isRead ?? this.isRead,
       mediaUrl: mediaUrl ?? this.mediaUrl,
       messageType: messageType ?? this.messageType,
+      replyToId: replyToId ?? this.replyToId,
+      replyToContent: replyToContent ?? this.replyToContent,
+      replyToSenderId: replyToSenderId ?? this.replyToSenderId,
     );
   }
 
@@ -53,6 +65,9 @@ class ChatMessage {
       'isRead': isRead,
       'mediaUrl': mediaUrl,
       'messageType': MessageType.typeToString(messageType),
+            'replyToId': replyToId,
+      'replyToContent': replyToContent,
+      'replyToSenderId': replyToSenderId,
     };
   }
 
@@ -68,6 +83,9 @@ class ChatMessage {
       messageType: map['messageType'] != null 
           ? MessageType.fromString(map['messageType']) 
           : MessageType.text,
+      replyToId: map['replyToId'],
+      replyToContent: map['replyToContent'],
+      replyToSenderId: map['replyToSenderId'],
     );
   }
 }

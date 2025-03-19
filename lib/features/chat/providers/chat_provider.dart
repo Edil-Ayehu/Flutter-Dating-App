@@ -8,6 +8,7 @@ class ChatProvider extends ChangeNotifier {
   final ChatRepository _repository;
   
   
+  
   List<ChatRoom> _chatRooms = [];
   Map<String, List<ChatMessage>> _messages = {};
   bool _isLoading = false;
@@ -174,6 +175,54 @@ class ChatProvider extends ChangeNotifier {
         isRead: false,
         mediaUrl: mediaUrl,
         messageType: messageType,
+      );
+      
+      // Add message to local state
+      if (_messages.containsKey(chatRoomId)) {
+        _messages[chatRoomId] = [..._messages[chatRoomId]!, message];
+      } else {
+        _messages[chatRoomId] = [message];
+      }
+      
+      // Update last message in chat room
+      final index = _chatRooms.indexWhere((room) => room.id == chatRoomId);
+      if (index != -1) {
+        _chatRooms[index] = _chatRooms[index].copyWith(
+          lastMessage: message,
+          lastActivity: DateTime.now(),
+        );
+      }
+      
+      notifyListeners();
+      
+      // Send message to repository
+      await _repository.sendMessage(message);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  // Add this method to send reply messages
+  Future<void> sendReplyMessage(
+    String chatRoomId,
+    String content,
+    ChatMessage replyToMessage,
+    {String? mediaUrl, MessageType messageType = MessageType.text}
+  ) async {
+    try {
+      final message = ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        senderId: _currentUserId,
+        receiverId: _chatRooms.firstWhere((room) => room.id == chatRoomId).matchId,
+        content: content,
+        timestamp: DateTime.now(),
+        isRead: false,
+        mediaUrl: mediaUrl,
+        messageType: messageType,
+        replyToId: replyToMessage.id,
+        replyToContent: replyToMessage.content,
+        replyToSenderId: replyToMessage.senderId,
       );
       
       // Add message to local state
