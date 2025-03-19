@@ -12,11 +12,9 @@ import '../providers/chat_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 
-
-
 class ChatScreen extends StatefulWidget {
   final ChatRoom chatRoom;
-  
+
   const ChatScreen({
     Key? key,
     required this.chatRoom,
@@ -46,7 +44,7 @@ class _ChatScreenState extends State<ChatScreen> {
       Provider.of<ChatProvider>(context, listen: false)
           .loadMessages(widget.chatRoom.id);
     });
-    
+
     // Add listener to focus node to hide emoji picker when keyboard appears
     _messageFocusNode.addListener(_onFocusChange);
   }
@@ -98,7 +96,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final newSelection = TextSelection.collapsed(
       offset: textSelection.start + emoji.emoji.length,
     );
-    
+
     setState(() {
       _messageController.text = newText;
       _messageController.selection = newSelection;
@@ -160,11 +158,11 @@ class _ChatScreenState extends State<ChatScreen> {
         source: source,
         imageQuality: 70,
       );
-      
+
       if (pickedFile != null) {
         // Show caption dialog
         final String? caption = await _showCaptionDialog();
-        
+
         // Send image message
         Provider.of<ChatProvider>(context, listen: false).sendMediaMessage(
           widget.chatRoom.id,
@@ -186,7 +184,7 @@ class _ChatScreenState extends State<ChatScreen> {
         source: ImageSource.gallery,
         maxDuration: const Duration(seconds: 30),
       );
-      
+
       if (pickedFile != null) {
         await _processVideoFile(pickedFile);
       }
@@ -203,7 +201,7 @@ class _ChatScreenState extends State<ChatScreen> {
         source: ImageSource.camera,
         maxDuration: const Duration(seconds: 30),
       );
-      
+
       if (capturedFile != null) {
         await _processVideoFile(capturedFile);
       }
@@ -219,17 +217,17 @@ class _ChatScreenState extends State<ChatScreen> {
     final File file = File(videoFile.path);
     final int fileSizeInBytes = await file.length();
     final double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
-    
+
     if (fileSizeInMB > 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Video size should be less than 10MB')),
       );
       return;
     }
-    
+
     // Show caption dialog
     final String? caption = await _showCaptionDialog();
-    
+
     // Send video message
     Provider.of<ChatProvider>(context, listen: false).sendMediaMessage(
       widget.chatRoom.id,
@@ -242,7 +240,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<String?> _showCaptionDialog() {
     final TextEditingController captionController = TextEditingController();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return showDialog<String>(
       context: context,
       builder: (context) => Dialog(
@@ -290,10 +288,13 @@ class _ChatScreenState extends State<ChatScreen> {
                 decoration: InputDecoration(
                   hintText: 'Write something about this...',
                   hintStyle: TextStyle(
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade500,
+                    color: isDarkMode
+                        ? Colors.grey.shade400
+                        : Colors.grey.shade500,
                   ),
                   filled: true,
-                  fillColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+                  fillColor:
+                      isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
@@ -315,8 +316,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     style: TextButton.styleFrom(
-                      foregroundColor: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      foregroundColor: isDarkMode
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade700,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -325,12 +329,14 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton(
-                    onPressed: () => Navigator.pop(context, captionController.text),
+                    onPressed: () =>
+                        Navigator.pop(context, captionController.text),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -351,101 +357,20 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _showMediaOptions() {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.photo_library_rounded,
-                  color: AppColors.primary,
-                ),
-                title: Text(
-                  'Photo Library',
-                  style: TextStyle(
-                    color: isDarkMode ? Colors.white : Colors.black,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.camera_alt_rounded,
-                  color: AppColors.primary,
-                ),
-                title: Text(
-                  'Camera',
-                  style: TextStyle(
-                    color: isDarkMode ? Colors.white : Colors.black,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.videocam_rounded,
-                  color: AppColors.primary,
-                ),
-                title: Text(
-                  'Video',
-                  style: TextStyle(
-                    color: isDarkMode ? Colors.white : Colors.black,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickVideo();
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final chatProvider = Provider.of<ChatProvider>(context);
     final messages = chatProvider.getMessagesForChatRoom(widget.chatRoom.id);
-    
+
     // Scroll to bottom when messages change
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
     });
-    
+
     return Scaffold(
-      backgroundColor: isDarkMode ? AppColors.backgroundDark : Colors.grey.shade50,
+      backgroundColor:
+          isDarkMode ? AppColors.backgroundDark : Colors.grey.shade50,
       appBar: AppBar(
         backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
         elevation: 0,
@@ -476,7 +401,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         color: Colors.green,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+                          color:
+                              isDarkMode ? Colors.grey.shade900 : Colors.white,
                           width: 2,
                         ),
                       ),
@@ -491,17 +417,20 @@ class _ChatScreenState extends State<ChatScreen> {
                 Text(
                   widget.chatRoom.matchName,
                   style: TextStyle(
-                    color: isDarkMode ? Colors.white : AppColors.textPrimaryLight,
+                    color:
+                        isDarkMode ? Colors.white : AppColors.textPrimaryLight,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
                 Text(
-                                    widget.chatRoom.isMatchOnline ? 'Online' : 'Offline',
+                  widget.chatRoom.isMatchOnline ? 'Online' : 'Offline',
                   style: TextStyle(
-                    color: widget.chatRoom.isMatchOnline 
-                        ? Colors.green 
-                        : (isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600),
+                    color: widget.chatRoom.isMatchOnline
+                        ? Colors.green
+                        : (isDarkMode
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600),
                     fontSize: 12,
                   ),
                 ),
@@ -519,7 +448,8 @@ class _ChatScreenState extends State<ChatScreen> {
               // Show options menu
               showModalBottomSheet(
                 context: context,
-                backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
+                backgroundColor:
+                    isDarkMode ? Colors.grey.shade900 : Colors.white,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
@@ -531,12 +461,15 @@ class _ChatScreenState extends State<ChatScreen> {
                       ListTile(
                         leading: Icon(
                           Icons.person,
-                          color: isDarkMode ? Colors.white : Colors.grey.shade800,
+                          color:
+                              isDarkMode ? Colors.white : Colors.grey.shade800,
                         ),
                         title: Text(
                           'View Profile',
                           style: TextStyle(
-                            color: isDarkMode ? Colors.white : Colors.grey.shade800,
+                            color: isDarkMode
+                                ? Colors.white
+                                : Colors.grey.shade800,
                           ),
                         ),
                         onTap: () {
@@ -598,13 +531,17 @@ class _ChatScreenState extends State<ChatScreen> {
                             Icon(
                               Icons.chat_bubble_outline,
                               size: 60,
-                              color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade400,
+                              color: isDarkMode
+                                  ? Colors.grey.shade700
+                                  : Colors.grey.shade400,
                             ),
                             const SizedBox(height: 16),
                             Text(
                               'No messages yet',
                               style: TextStyle(
-                                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+                                color: isDarkMode
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade700,
                                 fontSize: 16,
                               ),
                             ),
@@ -612,7 +549,9 @@ class _ChatScreenState extends State<ChatScreen> {
                             Text(
                               'Say hi to ${widget.chatRoom.matchName}!',
                               style: TextStyle(
-                                color: isDarkMode ? Colors.grey.shade500 : Colors.grey.shade600,
+                                color: isDarkMode
+                                    ? Colors.grey.shade500
+                                    : Colors.grey.shade600,
                                 fontSize: 14,
                               ),
                             ),
@@ -621,20 +560,24 @@ class _ChatScreenState extends State<ChatScreen> {
                       )
                     : ListView.builder(
                         controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 20),
                         itemCount: messages.length,
                         itemBuilder: (context, index) {
                           final message = messages[index];
-                          final isMe = message.senderId == chatProvider.currentUserId;
-                          final showDate = index == 0 || 
-                              !_isSameDay(messages[index - 1].timestamp, message.timestamp);
-                          
+                          final isMe =
+                              message.senderId == chatProvider.currentUserId;
+                          final showDate = index == 0 ||
+                              !_isSameDay(messages[index - 1].timestamp,
+                                  message.timestamp);
+
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               if (showDate)
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                   child: Center(
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
@@ -642,16 +585,16 @@ class _ChatScreenState extends State<ChatScreen> {
                                         vertical: 6,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: isDarkMode 
-                                            ? Colors.grey.shade800 
+                                        color: isDarkMode
+                                            ? Colors.grey.shade800
                                             : Colors.grey.shade200,
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Text(
                                         _formatMessageDate(message.timestamp),
                                         style: TextStyle(
-                                          color: isDarkMode 
-                                              ? Colors.grey.shade300 
+                                          color: isDarkMode
+                                              ? Colors.grey.shade300
                                               : Colors.grey.shade700,
                                           fontSize: 12,
                                         ),
@@ -669,7 +612,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         },
                       ),
           ),
-          
+
           // Icebreaker suggestion
           if (_showIcebreakerSuggestion)
             Padding(
@@ -684,10 +627,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 },
               ),
             ),
-          
+
           // Reply preview
           _buildReplyPreview(),
-          
+
           // Message input
           Container(
             decoration: BoxDecoration(
@@ -706,19 +649,21 @@ class _ChatScreenState extends State<ChatScreen> {
                 // Emoji button
                 IconButton(
                   icon: Icon(
-                    _showEmojiPicker ? Icons.keyboard : Icons.emoji_emotions_outlined,
+                    _showEmojiPicker
+                        ? Icons.keyboard
+                        : Icons.emoji_emotions_outlined,
                     color: AppColors.primary,
                   ),
                   onPressed: _toggleEmojiPicker,
                 ),
-                
+
                 // Attachment button
                 IconButton(
                   icon: const Icon(Icons.attach_file),
                   color: AppColors.primary,
                   onPressed: _showAttachmentOptions,
                 ),
-                
+
                 // Text input field
                 Expanded(
                   child: TextField(
@@ -731,7 +676,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+                      fillColor: isDarkMode
+                          ? Colors.grey.shade800
+                          : Colors.grey.shade200,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16.0,
                         vertical: 8.0,
@@ -744,7 +691,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
                 ),
-                
+
                 // Send button
                 IconButton(
                   icon: const Icon(Icons.send),
@@ -754,7 +701,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ],
             ),
           ),
-          
+
           // Emoji picker
           if (_showEmojiPicker) _buildEmojiPicker(),
         ],
@@ -766,7 +713,8 @@ class _ChatScreenState extends State<ChatScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       child: Row(
-        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) _buildAvatar(isDarkMode),
@@ -777,12 +725,13 @@ class _ChatScreenState extends State<ChatScreen> {
                 _showReplyUI(message);
               },
               child: Column(
-                crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
                   // Show reply content if this is a reply message
                   if (message.replyToId != null)
                     _buildReplyContent(message, isMe, isDarkMode),
-                  
+
                   // Show the actual message content based on type
                   if (message.messageType == MessageType.text)
                     _buildTextMessage(message, isMe, isDarkMode)
@@ -790,7 +739,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     _buildImageMessage(message, isMe, isDarkMode)
                   else if (message.messageType == MessageType.video)
                     _buildVideoMessage(message, isMe, isDarkMode),
-                  
+
                   // Show timestamp
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
@@ -798,7 +747,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       DateFormat('h:mm a').format(message.timestamp),
                       style: TextStyle(
                         fontSize: 10,
-                        color: isDarkMode ? Colors.grey.shade500 : Colors.grey.shade600,
+                        color: isDarkMode
+                            ? Colors.grey.shade500
+                            : Colors.grey.shade600,
                       ),
                     ),
                   ),
@@ -834,9 +785,8 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Text(
         message.content,
         style: TextStyle(
-          color: isMe
-              ? Colors.white
-              : (isDarkMode ? Colors.white : Colors.black),
+          color:
+              isMe ? Colors.white : (isDarkMode ? Colors.white : Colors.black),
           fontSize: 16,
         ),
       ),
@@ -845,9 +795,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildReplyContent(ChatMessage message, bool isMe, bool isDarkMode) {
     if (message.replyToId == null) return const SizedBox.shrink();
-    
-    final isReplyToMe = message.replyToSenderId == Provider.of<ChatProvider>(context, listen: false).currentUserId;
-    
+
+    final isReplyToMe = message.replyToSenderId ==
+        Provider.of<ChatProvider>(context, listen: false).currentUserId;
+
     return GestureDetector(
       onTap: () {
         // Scroll to the original message
@@ -857,8 +808,8 @@ class _ChatScreenState extends State<ChatScreen> {
         margin: const EdgeInsets.only(bottom: 4),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isDarkMode 
-              ? Colors.grey.shade800.withOpacity(0.5) 
+          color: isDarkMode
+              ? Colors.grey.shade800.withOpacity(0.5)
               : Colors.grey.shade200.withOpacity(0.7),
           borderRadius: BorderRadius.circular(8),
           border: const Border(
@@ -866,7 +817,8 @@ class _ChatScreenState extends State<ChatScreen> {
               color: AppColors.primary,
               width: 2,
             ),
-        ),),
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -875,9 +827,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 Icon(
                   Icons.reply,
                   size: 14,
-                  color: isReplyToMe 
-                      ? AppColors.primary 
-                      : (isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600),
+                  color: isReplyToMe
+                      ? AppColors.primary
+                      : (isDarkMode
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600),
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -885,9 +839,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
-                    color: isReplyToMe 
-                        ? AppColors.primary 
-                        : (isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700),
+                    color: isReplyToMe
+                        ? AppColors.primary
+                        : (isDarkMode
+                            ? Colors.grey.shade300
+                            : Colors.grey.shade700),
                   ),
                 ),
               ],
@@ -956,17 +912,20 @@ class _ChatScreenState extends State<ChatScreen> {
       });
       _videoControllers[message.id] = controller;
     }
-    
+
     final controller = _videoControllers[message.id]!;
-    
+
     return GestureDetector(
       onTap: () {
         // Navigate to full screen video player
-        Navigator.of(context).push(
+        Navigator.of(context)
+            .push(
           MaterialPageRoute(
-            builder: (context) => _FullScreenVideoPlayer(controller: controller),
+            builder: (context) =>
+                _FullScreenVideoPlayer(controller: controller),
           ),
-        ).then((_) {
+        )
+            .then((_) {
           // Pause the video when returning from full screen
           if (controller.value.isPlaying) {
             controller.pause();
@@ -1015,7 +974,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _showAttachmentOptions() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
@@ -1094,7 +1053,15 @@ class _ChatScreenState extends State<ChatScreen> {
                         // Implement audio recording
                       },
                     ),
-                    const SizedBox(width: 70), // Empty space for balance
+                    _buildAttachmentOption(
+                      icon: Icons.video_camera_back,
+                      label: 'Record Video',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _captureVideo();
+                      },
+                    ),
+                     // Empty space for balance
                   ],
                 ),
               ],
@@ -1111,7 +1078,7 @@ class _ChatScreenState extends State<ChatScreen> {
     required VoidCallback onTap,
   }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -1143,13 +1110,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _sendMessage() {
     if (_messageController.text.trim().isEmpty) return;
-    
+
     final content = _messageController.text.trim();
     _messageController.clear();
     setState(() {
       _isComposing = false;
     });
-    
+
     if (_isReplying && _replyToMessage != null) {
       // Send as a reply
       Provider.of<ChatProvider>(context, listen: false).sendReplyMessage(
@@ -1157,7 +1124,7 @@ class _ChatScreenState extends State<ChatScreen> {
         content,
         _replyToMessage!,
       );
-      
+
       // Reset reply state
       setState(() {
         _replyToMessage = null;
@@ -1170,7 +1137,7 @@ class _ChatScreenState extends State<ChatScreen> {
         content,
       );
     }
-    
+
     // Scroll to bottom after sending
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
@@ -1178,9 +1145,9 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   bool _isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year && 
-           date1.month == date2.month && 
-           date1.day == date2.day;
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   String _formatMessageDate(DateTime date) {
@@ -1188,7 +1155,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = DateTime(now.year, now.month, now.day - 1);
     final messageDate = DateTime(date.year, date.month, date.day);
-    
+
     if (messageDate == today) {
       return 'Today';
     } else if (messageDate == yesterday) {
@@ -1219,10 +1186,11 @@ class _ChatScreenState extends State<ChatScreen> {
     if (!_isReplying || _replyToMessage == null) {
       return const SizedBox.shrink();
     }
-    
+
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final isMyMessage = _replyToMessage!.senderId == Provider.of<ChatProvider>(context, listen: false).currentUserId;
-    
+    final isMyMessage = _replyToMessage!.senderId ==
+        Provider.of<ChatProvider>(context, listen: false).currentUserId;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -1245,7 +1213,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   isMyMessage ? 'You' : widget.chatRoom.matchName,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: isMyMessage ? AppColors.primary : Colors.grey.shade700,
+                    color:
+                        isMyMessage ? AppColors.primary : Colors.grey.shade700,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -1255,7 +1224,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+                      color: isDarkMode
+                          ? Colors.grey.shade300
+                          : Colors.grey.shade700,
                     ),
                   )
                 else if (_replyToMessage!.messageType == MessageType.image)
@@ -1266,7 +1237,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       Text(
                         'Photo',
                         style: TextStyle(
-                          color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+                          color: isDarkMode
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade700,
                         ),
                       ),
                     ],
@@ -1274,12 +1247,15 @@ class _ChatScreenState extends State<ChatScreen> {
                 else if (_replyToMessage!.messageType == MessageType.video)
                   Row(
                     children: [
-                      Icon(Icons.videocam, size: 16, color: Colors.grey.shade600),
+                      Icon(Icons.videocam,
+                          size: 16, color: Colors.grey.shade600),
                       const SizedBox(width: 4),
                       Text(
                         'Video',
                         style: TextStyle(
-                          color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+                          color: isDarkMode
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade700,
                         ),
                       ),
                     ],
@@ -1300,18 +1276,18 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _handleSubmitted(String text) {
     if (text.trim().isEmpty) return;
-    
+
     _messageController.clear();
     setState(() {
       _isComposing = false;
     });
-    
+
     // Send the message
     Provider.of<ChatProvider>(context, listen: false).sendMessage(
       widget.chatRoom.id,
       text,
     );
-    
+
     // Scroll to bottom after sending
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
@@ -1321,20 +1297,20 @@ class _ChatScreenState extends State<ChatScreen> {
   void _scrollToMessage(String messageId) {
     final messages = Provider.of<ChatProvider>(context, listen: false)
         .getMessagesForChatRoom(widget.chatRoom.id);
-    
+
     final index = messages.indexWhere((msg) => msg.id == messageId);
     if (index != -1) {
       // Calculate the position to scroll to
       final itemHeight = 70.0; // Approximate height of a message item
       final position = index * itemHeight;
-      
+
       // Scroll to the position
       _scrollController.animateTo(
         position,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
-      
+
       // Highlight the message briefly
       // This would require adding a highlighted state to the message item
     }
@@ -1356,7 +1332,7 @@ class _FullScreenVideoPlayer extends StatefulWidget {
 
 class _FullScreenVideoPlayerState extends State<_FullScreenVideoPlayer> {
   late VideoPlayerController _controller;
-  
+
   @override
   void initState() {
     super.initState();
@@ -1364,14 +1340,14 @@ class _FullScreenVideoPlayerState extends State<_FullScreenVideoPlayer> {
     // Add listener to update UI when video state changes
     _controller.addListener(_updateState);
   }
-  
+
   @override
   void dispose() {
     // Remove listener when disposing
     _controller.removeListener(_updateState);
     super.dispose();
   }
-  
+
   void _updateState() {
     if (mounted) {
       setState(() {});
