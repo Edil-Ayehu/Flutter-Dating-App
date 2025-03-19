@@ -10,6 +10,8 @@ import '../models/chat_message.dart';
 import '../models/chat_room.dart';
 import '../providers/chat_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+
 
 
 class ChatScreen extends StatefulWidget {
@@ -33,6 +35,8 @@ class _ChatScreenState extends State<ChatScreen> {
   Map<String, VideoPlayerController> _videoControllers = {};
   ChatMessage? _replyToMessage;
   bool _isReplying = false;
+  bool _showEmojiPicker = false;
+  FocusNode _messageFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -42,17 +46,102 @@ class _ChatScreenState extends State<ChatScreen> {
       Provider.of<ChatProvider>(context, listen: false)
           .loadMessages(widget.chatRoom.id);
     });
+    
+    // Add listener to focus node to hide emoji picker when keyboard appears
+    _messageFocusNode.addListener(_onFocusChange);
   }
 
   @override
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _messageFocusNode.removeListener(_onFocusChange);
+    _messageFocusNode.dispose();
     // Dispose all video controllers
     for (var controller in _videoControllers.values) {
       controller.dispose();
     }
     super.dispose();
+  }
+
+  void _onFocusChange() {
+    if (_messageFocusNode.hasFocus) {
+      setState(() {
+        _showEmojiPicker = false;
+      });
+    }
+  }
+
+  // Add this method to toggle emoji picker
+  void _toggleEmojiPicker() {
+    setState(() {
+      _showEmojiPicker = !_showEmojiPicker;
+      if (_showEmojiPicker) {
+        // Hide keyboard when showing emoji picker
+        _messageFocusNode.unfocus();
+      } else {
+        // Show keyboard when hiding emoji picker
+        _messageFocusNode.requestFocus();
+      }
+    });
+  }
+
+  // Add this method to insert emoji into text field
+  void _onEmojiSelected(Emoji emoji) {
+    final text = _messageController.text;
+    final textSelection = _messageController.selection;
+    final newText = text.replaceRange(
+      textSelection.start,
+      textSelection.end,
+      emoji.emoji,
+    );
+    final newSelection = TextSelection.collapsed(
+      offset: textSelection.start + emoji.emoji.length,
+    );
+    
+    setState(() {
+      _messageController.text = newText;
+      _messageController.selection = newSelection;
+      _isComposing = _messageController.text.isNotEmpty;
+    });
+  }
+
+  // Add this method to build the emoji picker
+  Widget _buildEmojiPicker() {
+    return SizedBox(
+      height: 250,
+      child: EmojiPicker(
+        onEmojiSelected: (category, emoji) {
+          _onEmojiSelected(emoji);
+        },
+        config: Config(
+          emojiViewConfig: EmojiViewConfig(
+            columns: 7,
+            emojiSizeMax: 32.0,
+            verticalSpacing: 0,
+            horizontalSpacing: 0,
+            gridPadding: EdgeInsets.zero,
+          ),
+          categoryViewConfig: CategoryViewConfig(
+            initCategory: Category.RECENT,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            indicatorColor: AppColors.primary,
+            iconColor: Colors.grey,
+            iconColorSelected: AppColors.primary,
+            tabIndicatorAnimDuration: kTabScrollDuration,
+            categoryIcons: const CategoryIcons(),
+          ),
+          bottomActionBarConfig: BottomActionBarConfig(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            buttonColor: AppColors.primary,
+          ),
+          skinToneConfig: const SkinToneConfig(
+            dialogBackgroundColor: Colors.white,
+            indicatorColor: Colors.grey,
+          ),
+        ),
+      ),
+    );
   }
 
   void _scrollToBottom() {
@@ -600,7 +689,74 @@ class _ChatScreenState extends State<ChatScreen> {
           _buildReplyPreview(),
           
           // Message input
-          _buildMessageInput(),
+          Container(
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 5,
+                  offset: const Offset(0, -1),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            child: Row(
+              children: [
+                // Emoji button
+                IconButton(
+                  icon: Icon(
+                    _showEmojiPicker ? Icons.keyboard : Icons.emoji_emotions_outlined,
+                    color: AppColors.primary,
+                  ),
+                  onPressed: _toggleEmojiPicker,
+                ),
+                
+                // Attachment button
+                IconButton(
+                  icon: const Icon(Icons.attach_file),
+                  color: AppColors.primary,
+                  onPressed: _showAttachmentOptions,
+                ),
+                
+                // Text input field
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    focusNode: _messageFocusNode,
+                    decoration: InputDecoration(
+                      hintText: 'Type a message...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
+                    ),
+                    onChanged: (text) {
+                      setState(() {
+                        _isComposing = text.isNotEmpty;
+                      });
+                    },
+                  ),
+                ),
+                
+                // Send button
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  color: _isComposing ? AppColors.primary : Colors.grey,
+                  onPressed: _isComposing ? _sendMessage : null,
+                ),
+              ],
+            ),
+          ),
+          
+          // Emoji picker
+          if (_showEmojiPicker) _buildEmojiPicker(),
         ],
       ),
     );
@@ -705,13 +861,12 @@ class _ChatScreenState extends State<ChatScreen> {
               ? Colors.grey.shade800.withOpacity(0.5) 
               : Colors.grey.shade200.withOpacity(0.7),
           borderRadius: BorderRadius.circular(8),
-          border: Border(
+          border: const Border(
             left: BorderSide(
               color: AppColors.primary,
               width: 2,
             ),
-          ),
-        ),
+        ),),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -858,166 +1013,105 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildMessageInput() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Attachment button
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline),
-            onPressed: () {
-              _showAttachmentOptions();
-            },
-          ),
-          
-          // Icebreaker button
-          IconButton(
-            icon: const Icon(
-              Icons.lightbulb_outline,
-              color: AppColors.primary,
-            ),
-            onPressed: () {
-              setState(() {
-                _showIcebreakerSuggestion = !_showIcebreakerSuggestion;
-              });
-            },
-          ),
-          
-          // Message text field
-          Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: InputDecoration(
-                hintText: 'Type a message...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.grey.shade800
-                    : Colors.grey.shade200,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-              ),
-              onChanged: (text) {
-                setState(() {
-                  _isComposing = text.isNotEmpty;
-                });
-              },
-            ),
-          ),
-          
-          // Send button
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: _isComposing ? AppColors.primary : Colors.grey.shade400,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: const Icon(
-                Icons.send_rounded,
-                size: 20,
-                color: Colors.white,
-              ),
-              onPressed: _isComposing
-                  ? () => _sendMessage()
-                  : null,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showAttachmentOptions() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                _buildAttachmentOption(
-                  icon: Icons.camera_alt,
-                  label: 'Camera',
-                  color: Colors.blue,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImage(ImageSource.camera);
-                  },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildAttachmentOption(
+                      icon: Icons.camera_alt,
+                      label: 'Camera',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _pickImage(ImageSource.camera);
+                      },
+                    ),
+                    _buildAttachmentOption(
+                      icon: Icons.photo_library,
+                      label: 'Gallery',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _pickImage(ImageSource.gallery);
+                      },
+                    ),
+                    _buildAttachmentOption(
+                      icon: Icons.videocam,
+                      label: 'Video',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _pickVideo();
+                      },
+                    ),
+                    _buildAttachmentOption(
+                      icon: Icons.emoji_emotions,
+                      label: 'Emoji',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _toggleEmojiPicker();
+                      },
+                    ),
+                  ],
                 ),
-                _buildAttachmentOption(
-                  icon: Icons.photo_library,
-                  label: 'Gallery',
-                  color: Colors.purple,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImage(ImageSource.gallery);
-                  },
-                ),
-                _buildAttachmentOption(
-                  icon: Icons.videocam,
-                  label: 'Video Camera',
-                  color: Colors.red,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _captureVideo();
-                  },
-                ),
-                _buildAttachmentOption(
-                  icon: Icons.video_library,
-                  label: 'Video Gallery',
-                  color: Colors.orange,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickVideo();
-                  },
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildAttachmentOption(
+                      icon: Icons.location_on,
+                      label: 'Location',
+                      onTap: () {
+                        Navigator.pop(context);
+                        // Implement location sharing
+                      },
+                    ),
+                    _buildAttachmentOption(
+                      icon: Icons.contact_phone,
+                      label: 'Contact',
+                      onTap: () {
+                        Navigator.pop(context);
+                        // Implement contact sharing
+                      },
+                    ),
+                    _buildAttachmentOption(
+                      icon: Icons.mic,
+                      label: 'Audio',
+                      onTap: () {
+                        Navigator.pop(context);
+                        // Implement audio recording
+                      },
+                    ),
+                    const SizedBox(width: 70), // Empty space for balance
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildAttachmentOption({
     required IconData icon,
     required String label,
-    required Color color,
     required VoidCallback onTap,
   }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -1026,12 +1120,12 @@ class _ChatScreenState extends State<ChatScreen> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(15),
+              color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(30),
             ),
             child: Icon(
               icon,
-              color: color,
+              color: AppColors.primary,
               size: 30,
             ),
           ),
@@ -1039,10 +1133,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Text(
             label,
             style: TextStyle(
-              fontSize: 12,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey.shade300
-                  : Colors.grey.shade700,
+              color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
             ),
           ),
         ],
