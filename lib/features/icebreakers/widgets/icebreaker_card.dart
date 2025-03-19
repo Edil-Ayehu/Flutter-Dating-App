@@ -77,7 +77,9 @@ class IcebreakerCard extends StatelessWidget {
               ),
               if (answer != null && (!isCompact || answer!.length < 50)) ...[
                 const SizedBox(height: 16),
-                const Divider(),
+                Divider(
+                  color: Colors.grey.shade300
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'Your Answer:',
@@ -104,6 +106,9 @@ class IcebreakerCard extends StatelessWidget {
                   spacing: 8,
                   children: icebreaker.tags.map((tag) {
                     return Chip(
+                      side: BorderSide(
+                        color: Colors.grey.shade200,
+                      ),
                       label: Text(
                         '#$tag',
                         style: TextStyle(

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/constants/color_constants.dart';
 import '../models/icebreaker.dart';
 import '../providers/icebreaker_provider.dart';
 import '../widgets/icebreaker_card.dart';
 
 
 class IcebreakerListScreen extends StatefulWidget {
-  const IcebreakerListScreen({Key? key}) : super(key: key);
+  const IcebreakerListScreen({super.key});
 
   @override
   State<IcebreakerListScreen> createState() => _IcebreakerListScreenState();
