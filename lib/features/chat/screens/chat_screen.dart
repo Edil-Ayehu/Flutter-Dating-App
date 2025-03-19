@@ -11,6 +11,7 @@ import '../models/chat_room.dart';
 import '../providers/chat_provider.dart';
 import 'package:intl/intl.dart';
 
+
 class ChatScreen extends StatefulWidget {
   final ChatRoom chatRoom;
   
@@ -96,34 +97,55 @@ class _ChatScreenState extends State<ChatScreen> {
       );
       
       if (pickedFile != null) {
-        // Check video size (limit to 10MB for example)
-        final File file = File(pickedFile.path);
-        final int fileSizeInBytes = await file.length();
-        final double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
-        
-        if (fileSizeInMB > 10) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Video size should be less than 10MB')),
-          );
-          return;
-        }
-        
-        // Show caption dialog
-        final String? caption = await _showCaptionDialog();
-        
-        // Send video message
-        Provider.of<ChatProvider>(context, listen: false).sendMediaMessage(
-          widget.chatRoom.id,
-          pickedFile.path,
-          MessageType.video,
-          caption: caption ?? '',
-        );
+        await _processVideoFile(pickedFile);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error picking video: $e')),
       );
     }
+  }
+
+  Future<void> _captureVideo() async {
+    try {
+      final XFile? capturedFile = await _picker.pickVideo(
+        source: ImageSource.camera,
+        maxDuration: const Duration(seconds: 30),
+      );
+      
+      if (capturedFile != null) {
+        await _processVideoFile(capturedFile);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error capturing video: $e')),
+      );
+    }
+  }
+
+  Future<void> _processVideoFile(XFile videoFile) async {
+    // Check video size (limit to 10MB for example)
+    final File file = File(videoFile.path);
+    final int fileSizeInBytes = await file.length();
+    final double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+    
+    if (fileSizeInMB > 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Video size should be less than 10MB')),
+      );
+      return;
+    }
+    
+    // Show caption dialog
+    final String? caption = await _showCaptionDialog();
+    
+    // Send video message
+    Provider.of<ChatProvider>(context, listen: false).sendMediaMessage(
+      widget.chatRoom.id,
+      videoFile.path,
+      MessageType.video,
+      caption: caption ?? '',
+    );
   }
 
   Future<String?> _showCaptionDialog() {
@@ -177,8 +199,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 decoration: InputDecoration(
                   hintText: 'Write something about this...',
                   hintStyle: TextStyle(
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
-                    fontSize: 15,
+                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade500,
                   ),
                   filled: true,
                   fillColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
@@ -186,10 +207,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
+                  contentPadding: const EdgeInsets.all(12),
                 ),
                 style: TextStyle(
                   color: isDarkMode ? Colors.white : Colors.black,
@@ -577,94 +595,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           
           // Message input
-          Container(
-            decoration: BoxDecoration(
-              color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -5),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Row(
-              children: [
-                // Icebreaker button
-                IconButton(
-                  icon: const Icon(Icons.lightbulb_outline),
-                  onPressed: () {
-                    setState(() {
-                      _showIcebreakerSuggestion = !_showIcebreakerSuggestion;
-                    });
-                  },
-                  color: _showIcebreakerSuggestion 
-                      ? AppColors.primary 
-                      : (isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700),
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.photo_camera,
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-                  ),
-                  onPressed: _showMediaOptions,
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: 'Type a message...',
-                      hintStyle: TextStyle(
-                        color: isDarkMode ? Colors.grey.shade500 : Colors.grey.shade500,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                    ),
-                    style: TextStyle(
-                      color: isDarkMode ? Colors.white : Colors.black,
-                    ),
-                    onChanged: (text) {
-                      setState(() {
-                        _isComposing = text.isNotEmpty;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOut,
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: _isComposing ? AppColors.primary : Colors.grey.shade400,
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.send_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    onPressed: _isComposing
-                        ? () {
-                            _handleSubmitted(_messageController.text);
-                          }
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildMessageInput(),
         ],
       ),
     );
@@ -858,6 +789,198 @@ class _ChatScreenState extends State<ChatScreen> {
                 size: 30,
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessageInput() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Attachment button
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline),
+            onPressed: () {
+              _showAttachmentOptions();
+            },
+          ),
+          
+          // Icebreaker button
+          IconButton(
+            icon: const Icon(
+              Icons.lightbulb_outline,
+              color: AppColors.primary,
+            ),
+            onPressed: () {
+              setState(() {
+                _showIcebreakerSuggestion = !_showIcebreakerSuggestion;
+              });
+            },
+          ),
+          
+          // Message text field
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              decoration: InputDecoration(
+                hintText: 'Type a message...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey.shade800
+                    : Colors.grey.shade200,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+              ),
+              onChanged: (text) {
+                setState(() {
+                  _isComposing = text.isNotEmpty;
+                });
+              },
+            ),
+          ),
+          
+          // Send button
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: _isComposing ? AppColors.primary : Colors.grey.shade400,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.send_rounded,
+                size: 20,
+                color: Colors.white,
+              ),
+              onPressed: _isComposing
+                  ? () => _handleSubmitted(_messageController.text)
+                  : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAttachmentOptions() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildAttachmentOption(
+                  icon: Icons.camera_alt,
+                  label: 'Camera',
+                  color: Colors.blue,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.camera);
+                  },
+                ),
+                _buildAttachmentOption(
+                  icon: Icons.photo_library,
+                  label: 'Gallery',
+                  color: Colors.purple,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.gallery);
+                  },
+                ),
+                _buildAttachmentOption(
+                  icon: Icons.videocam,
+                  label: 'Video Camera',
+                  color: Colors.red,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _captureVideo();
+                  },
+                ),
+                _buildAttachmentOption(
+                  icon: Icons.video_library,
+                  label: 'Video Gallery',
+                  color: Colors.orange,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickVideo();
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAttachmentOption({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 30,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey.shade300
+                  : Colors.grey.shade700,
+            ),
+          ),
         ],
       ),
     );
