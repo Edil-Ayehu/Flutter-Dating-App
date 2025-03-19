@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import '../models/chat_message.dart';
 import '../models/chat_room.dart';
 import '../repositories/chat_repository.dart';
+import '../../../core/enums/message_type.dart';
 
 class ChatProvider extends ChangeNotifier {
   final ChatRepository _repository;
+  
   
   List<ChatRoom> _chatRooms = [];
   Map<String, List<ChatMessage>> _messages = {};
@@ -74,7 +76,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   // Send a message
-  Future<void> sendMessage(String chatRoomId, String content, {String? imageUrl}) async {
+  Future<void> sendMessage(String chatRoomId, String content, {String? mediaUrl}) async {
     try {
       final message = ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -83,7 +85,7 @@ class ChatProvider extends ChangeNotifier {
         content: content,
         timestamp: DateTime.now(),
         isRead: false,
-        imageUrl: imageUrl,
+        mediaUrl: mediaUrl,
       );
       
       // Add message to local state
@@ -149,5 +151,54 @@ class ChatProvider extends ChangeNotifier {
   // Refresh chat rooms
   Future<void> refreshChatRooms() async {
     await _loadChatRooms();
+  }
+
+  // Add this method to send media messages
+  Future<void> sendMediaMessage(
+    String chatRoomId, 
+    String mediaPath, 
+    MessageType messageType,
+    {String caption = ''}
+  ) async {
+    try {
+      // In a real app, you would upload the media to storage and get the URL
+      // For this example, we'll just use the local path as the URL
+      final String mediaUrl = mediaPath;
+      
+      final message = ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        senderId: _currentUserId,
+        receiverId: _chatRooms.firstWhere((room) => room.id == chatRoomId).matchId,
+        content: caption,
+        timestamp: DateTime.now(),
+        isRead: false,
+        mediaUrl: mediaUrl,
+        messageType: messageType,
+      );
+      
+      // Add message to local state
+      if (_messages.containsKey(chatRoomId)) {
+        _messages[chatRoomId] = [..._messages[chatRoomId]!, message];
+      } else {
+        _messages[chatRoomId] = [message];
+      }
+      
+      // Update last message in chat room
+      final index = _chatRooms.indexWhere((room) => room.id == chatRoomId);
+      if (index != -1) {
+        _chatRooms[index] = _chatRooms[index].copyWith(
+          lastMessage: message,
+          lastActivity: DateTime.now(),
+        );
+      }
+      
+      notifyListeners();
+      
+      // Send message to repository
+      await _repository.sendMessage(message);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
   }
 }

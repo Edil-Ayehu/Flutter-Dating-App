@@ -1,13 +1,15 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dating_app/features/icebreakers/widgets/icebreaker_suggestion_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:video_player/video_player.dart';
 import '../../../core/constants/color_constants.dart';
+import '../../../core/enums/message_type.dart';
 import '../models/chat_message.dart';
 import '../models/chat_room.dart';
 import '../providers/chat_provider.dart';
 import 'package:intl/intl.dart';
-
-
 
 class ChatScreen extends StatefulWidget {
   final ChatRoom chatRoom;
@@ -24,8 +26,10 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final ImagePicker _picker = ImagePicker();
   bool _isComposing = false;
   bool _showIcebreakerSuggestion = false;
+  Map<String, VideoPlayerController> _videoControllers = {};
 
   @override
   void initState() {
@@ -41,6 +45,10 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    // Dispose all video controllers
+    for (var controller in _videoControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -52,6 +60,208 @@ class _ChatScreenState extends State<ChatScreen> {
         curve: Curves.easeOut,
       );
     }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 70,
+      );
+      
+      if (pickedFile != null) {
+        // Show caption dialog
+        final String? caption = await _showCaptionDialog();
+        
+        // Send image message
+        Provider.of<ChatProvider>(context, listen: false).sendMediaMessage(
+          widget.chatRoom.id,
+          pickedFile.path,
+          MessageType.image,
+          caption: caption ?? '',
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking image: $e')),
+      );
+    }
+  }
+
+  Future<void> _pickVideo() async {
+    try {
+      final XFile? pickedFile = await _picker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: const Duration(seconds: 30),
+      );
+      
+      if (pickedFile != null) {
+        // Check video size (limit to 10MB for example)
+        final File file = File(pickedFile.path);
+        final int fileSizeInBytes = await file.length();
+        final double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+        
+        if (fileSizeInMB > 10) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Video size should be less than 10MB')),
+          );
+          return;
+        }
+        
+        // Show caption dialog
+        final String? caption = await _showCaptionDialog();
+        
+        // Send video message
+        Provider.of<ChatProvider>(context, listen: false).sendMediaMessage(
+          widget.chatRoom.id,
+          pickedFile.path,
+          MessageType.video,
+          caption: caption ?? '',
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking video: $e')),
+      );
+    }
+  }
+
+  Future<String?> _showCaptionDialog() {
+    final TextEditingController captionController = TextEditingController();
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
+        title: Text(
+          'Add a caption',
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+        ),
+        content: TextField(
+          controller: captionController,
+          decoration: InputDecoration(
+            hintText: 'Caption (optional)',
+            hintStyle: TextStyle(
+              color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+            ),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+              ),
+            ),
+          ),
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, captionController.text),
+            child: Text(
+              'Send',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMediaOptions() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.photo_library_rounded,
+                  color: AppColors.primary,
+                ),
+                title: Text(
+                  'Photo Library',
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.camera_alt_rounded,
+                  color: AppColors.primary,
+                ),
+                title: Text(
+                  'Camera',
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.videocam_rounded,
+                  color: AppColors.primary,
+                ),
+                title: Text(
+                  'Video',
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickVideo();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -338,9 +548,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     Icons.photo_camera,
                     color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
                   ),
-                  onPressed: () {
-                    // Handle image upload
-                  },
+                  onPressed: _showMediaOptions,
                 ),
                 Expanded(
                   child: TextField(
@@ -422,7 +630,9 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
           Flexible(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: message.messageType == MessageType.text
+                  ? const EdgeInsets.symmetric(horizontal: 16, vertical: 10)
+                  : const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               decoration: BoxDecoration(
                 color: isMe
                     ? AppColors.primary
@@ -435,15 +645,39 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    message.content,
-                    style: TextStyle(
-                      color: isMe
-                          ? Colors.white
-                          : (isDarkMode ? Colors.white : Colors.black),
-                      fontSize: 16,
+                  // Media content
+                  if (message.messageType == MessageType.image)
+                    _buildImageMessage(message, isMe, isDarkMode)
+                  else if (message.messageType == MessageType.video)
+                    _buildVideoMessage(message, isMe, isDarkMode)
+                  else
+                    Text(
+                      message.content,
+                      style: TextStyle(
+                        color: isMe
+                            ? Colors.white
+                            : (isDarkMode ? Colors.white : Colors.black),
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
+                  
+                  // Caption for media messages
+                  if ((message.messageType == MessageType.image || 
+                       message.messageType == MessageType.video) && 
+                       message.content.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        message.content,
+                        style: TextStyle(
+                          color: isMe
+                              ? Colors.white.withOpacity(0.9)
+                              : (isDarkMode ? Colors.white.withOpacity(0.9) : Colors.black.withOpacity(0.9)),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  
                   const SizedBox(height: 4),
                   Text(
                     DateFormat('h:mm a').format(message.timestamp),
@@ -466,6 +700,104 @@ class _ChatScreenState extends State<ChatScreen> {
               color: message.isRead ? Colors.blue : Colors.grey,
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageMessage(ChatMessage message, bool isMe, bool isDarkMode) {
+    return GestureDetector(
+      onTap: () {
+        // Show full screen image
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => Scaffold(
+              backgroundColor: Colors.black,
+              appBar: AppBar(
+                backgroundColor: Colors.black,
+                iconTheme: const IconThemeData(color: Colors.white),
+                elevation: 0,
+              ),
+              body: Center(
+                child: InteractiveViewer(
+                  minScale: 0.5,
+                  maxScale: 3.0,
+                  child: Image.file(
+                    File(message.mediaUrl!),
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.file(
+          File(message.mediaUrl!),
+          width: 200,
+          height: 200,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVideoMessage(ChatMessage message, bool isMe, bool isDarkMode) {
+    // Initialize video controller if not already initialized
+    if (!_videoControllers.containsKey(message.id)) {
+      final controller = VideoPlayerController.file(File(message.mediaUrl!));
+      controller.initialize().then((_) {
+        setState(() {});
+      });
+      _videoControllers[message.id] = controller;
+    }
+    
+    final controller = _videoControllers[message.id]!;
+    
+    return GestureDetector(
+      onTap: () {
+        // Toggle play/pause
+        setState(() {
+          controller.value.isPlaying ? controller.pause() : controller.play();
+        });
+      },
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 200,
+              height: 200,
+              color: Colors.black,
+              child: controller.value.isInitialized
+                  ? AspectRatio(
+                      aspectRatio: controller.value.aspectRatio,
+                      child: VideoPlayer(controller),
+                    )
+                  : const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
+          ),
+          if (controller.value.isInitialized && !controller.value.isPlaying)
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.play_arrow,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
         ],
       ),
     );

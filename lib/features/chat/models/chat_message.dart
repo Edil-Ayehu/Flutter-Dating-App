@@ -1,3 +1,5 @@
+import 'package:flutter_dating_app/core/enums/message_type.dart';
+
 class ChatMessage {
   final String id;
   final String senderId;
@@ -5,7 +7,8 @@ class ChatMessage {
   final String content;
   final DateTime timestamp;
   final bool isRead;
-  final String? imageUrl;
+  final String? mediaUrl;
+  final MessageType messageType;
 
   ChatMessage({
     required this.id,
@@ -14,7 +17,8 @@ class ChatMessage {
     required this.content,
     required this.timestamp,
     this.isRead = false,
-    this.imageUrl,
+    this.mediaUrl,
+    this.messageType = MessageType.text,
   });
 
   ChatMessage copyWith({
@@ -24,7 +28,8 @@ class ChatMessage {
     String? content,
     DateTime? timestamp,
     bool? isRead,
-    String? imageUrl,
+    String? mediaUrl,
+    MessageType? messageType,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -33,7 +38,8 @@ class ChatMessage {
       content: content ?? this.content,
       timestamp: timestamp ?? this.timestamp,
       isRead: isRead ?? this.isRead,
-      imageUrl: imageUrl ?? this.imageUrl,
+      mediaUrl: mediaUrl ?? this.mediaUrl,
+      messageType: messageType ?? this.messageType,
     );
   }
 
@@ -45,7 +51,8 @@ class ChatMessage {
       'content': content,
       'timestamp': timestamp.millisecondsSinceEpoch,
       'isRead': isRead,
-      'imageUrl': imageUrl,
+      'mediaUrl': mediaUrl,
+      'messageType': MessageType.typeToString(messageType),
     };
   }
 
@@ -57,7 +64,10 @@ class ChatMessage {
       content: map['content'] ?? '',
       timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp']),
       isRead: map['isRead'] ?? false,
-      imageUrl: map['imageUrl'],
+      mediaUrl: map['mediaUrl'],
+      messageType: map['messageType'] != null 
+          ? MessageType.fromString(map['messageType']) 
+          : MessageType.text,
     );
   }
 }
