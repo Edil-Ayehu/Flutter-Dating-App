@@ -752,33 +752,7 @@ class _ChatScreenState extends State<ChatScreen> {
         // Navigate to full screen video player
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => Scaffold(
-              backgroundColor: Colors.black,
-              appBar: AppBar(
-                backgroundColor: Colors.black,
-                iconTheme: const IconThemeData(color: Colors.white),
-                elevation: 0,
-              ),
-              body: Center(
-                child: AspectRatio(
-                  aspectRatio: controller.value.aspectRatio,
-                  child: VideoPlayer(controller),
-                ),
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  setState(() {
-                    controller.value.isPlaying
-                        ? controller.pause()
-                        : controller.play();
-                  });
-                },
-                backgroundColor: AppColors.primary,
-                child: Icon(
-                  controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-                ),
-              ),
-            ),
+            builder: (context) => _FullScreenVideoPlayer(controller: controller),
           ),
         ).then((_) {
           // Pause the video when returning from full screen
@@ -1053,5 +1027,74 @@ class _ChatScreenState extends State<ChatScreen> {
     } else {
       return DateFormat('MMM d, yyyy').format(date);
     }
+  }
+}
+
+// Add this new class for the full-screen video player
+class _FullScreenVideoPlayer extends StatefulWidget {
+  final VideoPlayerController controller;
+
+  const _FullScreenVideoPlayer({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
+  @override
+  State<_FullScreenVideoPlayer> createState() => _FullScreenVideoPlayerState();
+}
+
+class _FullScreenVideoPlayerState extends State<_FullScreenVideoPlayer> {
+  late VideoPlayerController _controller;
+  
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller;
+    // Add listener to update UI when video state changes
+    _controller.addListener(_updateState);
+  }
+  
+  @override
+  void dispose() {
+    // Remove listener when disposing
+    _controller.removeListener(_updateState);
+    super.dispose();
+  }
+  
+  void _updateState() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+      ),
+      body: Center(
+        child: AspectRatio(
+          aspectRatio: _controller.value.aspectRatio,
+          child: VideoPlayer(_controller),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _controller.value.isPlaying
+                ? _controller.pause()
+                : _controller.play();
+          });
+        },
+        backgroundColor: AppColors.primary,
+        child: Icon(
+          _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+        ),
+      ),
+    );
   }
 }
