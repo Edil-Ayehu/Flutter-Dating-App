@@ -692,45 +692,63 @@ class _ChatScreenState extends State<ChatScreen> {
     
     final isReplyToMe = message.replyToSenderId == Provider.of<ChatProvider>(context, listen: false).currentUserId;
     
-    return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: isDarkMode 
-            ? Colors.grey.shade800.withOpacity(0.5) 
-            : Colors.grey.shade200.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(8),
-        border: Border(
-          left: BorderSide(
-            color: AppColors.primary,
-            width: 2,
+    return GestureDetector(
+      onTap: () {
+        // Scroll to the original message
+        _scrollToMessage(message.replyToId!);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isDarkMode 
+              ? Colors.grey.shade800.withOpacity(0.5) 
+              : Colors.grey.shade200.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(8),
+          border: Border(
+            left: BorderSide(
+              color: AppColors.primary,
+              width: 2,
+            ),
           ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            isReplyToMe ? 'You' : widget.chatRoom.matchName,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-              color: isReplyToMe 
-                  ? AppColors.primary 
-                  : (isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.reply,
+                  size: 14,
+                  color: isReplyToMe 
+                      ? AppColors.primary 
+                      : (isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  isReplyToMe ? 'You' : widget.chatRoom.matchName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: isReplyToMe 
+                        ? AppColors.primary 
+                        : (isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            message.replyToContent ?? '',
-            style: TextStyle(
-              fontSize: 12,
-              color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+            const SizedBox(height: 2),
+            Text(
+              message.replyToContent ?? '',
+              style: TextStyle(
+                fontSize: 12,
+                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1207,6 +1225,28 @@ class _ChatScreenState extends State<ChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
     });
+  }
+
+  void _scrollToMessage(String messageId) {
+    final messages = Provider.of<ChatProvider>(context, listen: false)
+        .getMessagesForChatRoom(widget.chatRoom.id);
+    
+    final index = messages.indexWhere((msg) => msg.id == messageId);
+    if (index != -1) {
+      // Calculate the position to scroll to
+      final itemHeight = 70.0; // Approximate height of a message item
+      final position = index * itemHeight;
+      
+      // Scroll to the position
+      _scrollController.animateTo(
+        position,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+      
+      // Highlight the message briefly
+      // This would require adding a highlighted state to the message item
+    }
   }
 }
 
