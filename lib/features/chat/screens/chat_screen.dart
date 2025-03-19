@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_dating_app/features/chat/widgets/attachment_options.dart';
 import 'package:flutter_dating_app/features/chat/widgets/caption_dialog.dart';
 import 'package:flutter_dating_app/features/icebreakers/widgets/icebreaker_suggestion_widget.dart';
 import 'package:provider/provider.dart';
@@ -857,141 +858,24 @@ Future<String?> _showCaptionDialog() {
     );
   }
 
-  void _showAttachmentOptions() {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildAttachmentOption(
-                      icon: Icons.camera_alt,
-                      label: 'Camera',
-                      onTap: () {
-                        Navigator.pop(context);
-                        _pickImage(ImageSource.camera);
-                      },
-                    ),
-                    _buildAttachmentOption(
-                      icon: Icons.photo_library,
-                      label: 'Gallery',
-                      onTap: () {
-                        Navigator.pop(context);
-                        _pickImage(ImageSource.gallery);
-                      },
-                    ),
-                    _buildAttachmentOption(
-                      icon: Icons.videocam,
-                      label: 'Video',
-                      onTap: () {
-                        Navigator.pop(context);
-                        _pickVideo();
-                      },
-                    ),
-                    _buildAttachmentOption(
-                      icon: Icons.emoji_emotions,
-                      label: 'Emoji',
-                      onTap: () {
-                        Navigator.pop(context);
-                        _toggleEmojiPicker();
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildAttachmentOption(
-                      icon: Icons.location_on,
-                      label: 'Location',
-                      onTap: () {
-                        Navigator.pop(context);
-                        // Implement location sharing
-                      },
-                    ),
-                    _buildAttachmentOption(
-                      icon: Icons.contact_phone,
-                      label: 'Contact',
-                      onTap: () {
-                        Navigator.pop(context);
-                        // Implement contact sharing
-                      },
-                    ),
-                    _buildAttachmentOption(
-                      icon: Icons.mic,
-                      label: 'Audio',
-                      onTap: () {
-                        Navigator.pop(context);
-                        // Implement audio recording
-                      },
-                    ),
-                    _buildAttachmentOption(
-                      icon: Icons.video_camera_back,
-                      label: 'Record Video',
-                      onTap: () {
-                        Navigator.pop(context);
-                        _captureVideo();
-                      },
-                    ),
-                     // Empty space for balance
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildAttachmentOption({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Icon(
-              icon,
-              color: AppColors.primary,
-              size: 30,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+void _showAttachmentOptions() {
+  showAttachmentOptions(
+    context: context,
+    onImageSelected: (source) => _pickImage(source),
+    onVideoGallerySelected: _pickVideo,
+    onVideoCameraSelected: _captureVideo,
+    onEmojiSelected: _toggleEmojiPicker,
+    onLocationSelected: () {
+      // Implement location sharing
+    },
+    onContactSelected: () {
+      // Implement contact sharing
+    },
+    onAudioSelected: () {
+      // Implement audio recording
+    },
+  );
+}
 
   void _sendMessage() {
     if (_messageController.text.trim().isEmpty) return;
