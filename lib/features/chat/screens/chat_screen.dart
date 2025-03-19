@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_dating_app/features/chat/utils/media_handler.dart';
 import 'package:flutter_dating_app/features/chat/widgets/attachment_options.dart';
 import 'package:flutter_dating_app/features/chat/widgets/caption_dialog.dart';
 import 'package:flutter_dating_app/features/chat/widgets/full_screen_video_player.dart';
@@ -38,10 +39,16 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isReplying = false;
   bool _showEmojiPicker = false;
   FocusNode _messageFocusNode = FocusNode();
+  late MediaHandler _mediaHandler;
 
   @override
   void initState() {
     super.initState();
+       // Initialize the media handler
+    _mediaHandler = MediaHandler(
+      context: context,
+      chatRoomId: widget.chatRoom.id,
+    );
     // Load messages
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<ChatProvider>(context, listen: false)
@@ -156,93 +163,16 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    try {
-      final XFile? pickedFile = await _picker.pickImage(
-        source: source,
-        imageQuality: 70,
-      );
-
-      if (pickedFile != null) {
-        // Show caption dialog
-        final String? caption = await _showCaptionDialog();
-
-        // Send image message
-        Provider.of<ChatProvider>(context, listen: false).sendMediaMessage(
-          widget.chatRoom.id,
-          pickedFile.path,
-          MessageType.image,
-          caption: caption ?? '',
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking image: $e')),
-      );
-    }
+    await _mediaHandler.pickImage(source);
   }
 
   Future<void> _pickVideo() async {
-    try {
-      final XFile? pickedFile = await _picker.pickVideo(
-        source: ImageSource.gallery,
-        maxDuration: const Duration(seconds: 30),
-      );
-
-      if (pickedFile != null) {
-        await _processVideoFile(pickedFile);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking video: $e')),
-      );
-    }
+    await _mediaHandler.pickVideo();
   }
 
   Future<void> _captureVideo() async {
-    try {
-      final XFile? capturedFile = await _picker.pickVideo(
-        source: ImageSource.camera,
-        maxDuration: const Duration(seconds: 30),
-      );
-
-      if (capturedFile != null) {
-        await _processVideoFile(capturedFile);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error capturing video: $e')),
-      );
-    }
+    await _mediaHandler.captureVideo();
   }
-
-  Future<void> _processVideoFile(XFile videoFile) async {
-    // Check video size (limit to 10MB for example)
-    final File file = File(videoFile.path);
-    final int fileSizeInBytes = await file.length();
-    final double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
-
-    if (fileSizeInMB > 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Video size should be less than 10MB')),
-      );
-      return;
-    }
-
-    // Show caption dialog
-    final String? caption = await _showCaptionDialog();
-
-    // Send video message
-    Provider.of<ChatProvider>(context, listen: false).sendMediaMessage(
-      widget.chatRoom.id,
-      videoFile.path,
-      MessageType.video,
-      caption: caption ?? '',
-    );
-  }
-
-Future<String?> _showCaptionDialog() {
-  return showCaptionDialog(context);
-}
 
   @override
   Widget build(BuildContext context) {
