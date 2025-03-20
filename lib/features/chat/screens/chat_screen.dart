@@ -474,6 +474,16 @@ class _ChatScreenState extends State<ChatScreen> {
                   onPressed: _toggleEmojiPicker,
                 ),
 
+                // Icebreaker suggestion button (NEW)
+                IconButton(
+                  icon: Icon(
+                    Icons.lightbulb_outline,
+                    color: _showIcebreakerSuggestion ? AppColors.primary : Colors.grey,
+                  ),
+                  onPressed: _toggleIcebreakerSuggestion,
+                  tooltip: 'Get icebreaker suggestions',
+                ),
+
                 // Attachment button
                 IconButton(
                   icon: const Icon(Icons.attach_file),
@@ -1014,5 +1024,11 @@ void _showAttachmentOptions() {
       // Highlight the message briefly
       // This would require adding a highlighted state to the message item
     }
+  }
+
+  void _toggleIcebreakerSuggestion() {
+    setState(() {
+      _showIcebreakerSuggestion = !_showIcebreakerSuggestion;
+    });
   }
 }
